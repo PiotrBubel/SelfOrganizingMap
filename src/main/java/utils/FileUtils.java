@@ -24,10 +24,12 @@ public class FileUtils {
 
     public static void saveListOfPoints(String filePath, List<Point> data) {
         try (PrintStream out = new PrintStream(new FileOutputStream(filePath))) {
-            DecimalFormat df = new DecimalFormat("0.000");
+            DecimalFormat df = new DecimalFormat("0.00000000");
             for (Point point : data) {
-                out.print(df.format(point.getX()) + " " + df.format(point.getY()));
-                out.println();
+                if (!Double.isNaN(point.getY()) && !Double.isNaN(point.getX())) {
+                    out.print(df.format(point.getX()).replaceAll(",", ".") + " " + df.format(point.getY()).replaceAll(",", "."));
+                    out.println();
+                }
             }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(FileUtils.class.getName()).log(Level.SEVERE, null, ex);
@@ -41,7 +43,7 @@ public class FileUtils {
                 String line = sc.nextLine();
                 String[] values = line.split(" ");
                 listOfLists.add(new Point(
-                        Double.parseDouble(values[0].replaceAll(",", ".")),
+                        Double.parseDouble(values[0].replaceAll(",", ".")), //nie wiem czy nie odwrotnie . i ,
                         Double.parseDouble(values[1].replaceAll(",", "."))));
             }
         } catch (FileNotFoundException ex) {

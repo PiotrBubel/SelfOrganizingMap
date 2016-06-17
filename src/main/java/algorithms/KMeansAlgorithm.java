@@ -1,11 +1,18 @@
 package algorithms;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import points.ClusteredPoint;
 import points.Point;
+import utils.FileUtils;
+import utils.Utils;
 
 /**
  * Created by Piotrek on 16.06.2016.
@@ -14,8 +21,12 @@ public class KMeansAlgorithm {
 
     public static double minX, minY = -2d;
     public static double maxX, maxY = 2d;
-
+    private String outputFilePrefix = "_K-Means";
     private ClusteredPoint[] groupCenters; //centroids
+
+    public void setOutputFilePrefix(String prefix) {
+        this.outputFilePrefix = prefix;
+    }
 
     private ClusteredPoint[] randomizeCentroids(int groups) {
         ClusteredPoint[] randomized = new ClusteredPoint[groups];
@@ -57,8 +68,21 @@ public class KMeansAlgorithm {
         return group;
     }
 
+    private ClusteredPoint findNewCentroid(List<ClusteredPoint> points, int group) {
+        int howMuch = 0;
+        double sumX = 0d;
+        double sumY = 0d;
+        for (ClusteredPoint p : points) {
+            if (p.getGroup() == group) {
+                howMuch++;
+                sumX = sumX + p.getX();
+                sumY = sumY + p.getY();
+            }
+        }
+        return new ClusteredPoint(sumX / howMuch, sumY / howMuch, group);
+    }
+
     private List<ClusteredPoint> groupClustered(List<ClusteredPoint> input, int groups, int iterations) {
-        //this.groupCenters = randomizeCentroids(groups);
         this.groupCenters = randomizeCentroidsFromInputs(groups, input);
 
         for (int it = 0; it < iterations; it++) {
@@ -67,25 +91,53 @@ public class KMeansAlgorithm {
                 p.setGroup(belongsTo(p));
             }
             //ustalamy nowe srodki skupien (srednia wspolrzednych)
+            List<List<ClusteredPoint>> lists = Utils.splitClusteredPoints2(input);
             for (int i = 0; i < groupCenters.length; i++) {
+                //groupCenters[i] = findNewCentroid2(lists.get(i), i);
                 groupCenters[i] = findNewCentroid(input, i);
             }
+
+            saveGroupsToFiles(input, it);
+            List<Point> list = new ArrayList<>();
+            for (ClusteredPoint p : groupCenters) {
+                list.add(p);
+            }
+            FileUtils.saveListOfPoints("_centroids" + it, list);
+            System.out.println("ended " + it + "iteration");
         }
+
+        String plotFile = "_plotAnimation";
+        savePlotCommand(groups, iterations, plotFile);
+
+        try {
+            Utils.runGnuplotScript(plotFile);
+        } catch (IOException e) {
+            System.out.println("Blad podczas rysowania animacji k-srednich");
+        }
+
+        deleteFiles(iterations, groups);
+
         return input;
     }
 
-    private ClusteredPoint findNewCentroid(List<ClusteredPoint> points, int group) {
-        double howMuch = 0d;
-        double sumX = 0d;
-        double sumY = 0d;
-        for (ClusteredPoint p : points) {
-            if (p.getGroup() == group) {
-                howMuch = howMuch + 1d;
-                sumX = +p.getX();
-                sumY = +p.getY();
+    private void deleteFiles(int iterations, int groups) {
+        for (int it = 0; it < iterations; it++) {
+            File f;
+            f = new File("_centroids" + it);
+            f.delete();
+            for (int g = 0; g < groups; g++) {
+                f = new File(outputFilePrefix + "_group" + g + "_it" + it);
+                f.delete();
             }
+
         }
-        return new ClusteredPoint(sumX / howMuch, sumY / howMuch, group);
+    }
+
+    private void saveGroupsToFiles(List<ClusteredPoint> clustered, int iteration) {
+        List<List<Point>> l = Utils.splitClusteredPoints(clustered);
+        for (int i = 0; i < l.size(); i++) {
+            FileUtils.saveListOfPoints(this.outputFilePrefix + "_group" + i + "_it" + iteration, l.get(i));
+        }
     }
 
     public List<ClusteredPoint> group(List<Point> input, int groups, int iterations) {
@@ -94,5 +146,28 @@ public class KMeansAlgorithm {
             clustered.add(new ClusteredPoint(p.getX(), p.getY(), 0));
         }
         return groupClustered(clustered, groups, iterations);
+    }
+
+    private void savePlotCommand(int groups, int iterations, String plotFilePath) {
+        try (PrintStream out = new PrintStream(new FileOutputStream(plotFilePath))) {
+            out.println("set terminal gif animate delay 25");
+            out.println("set output '" + outputFilePrefix + "_animation.gif" + "'");
+            out.println("set key outside");
+            iterations = iterations - 1;
+            out.println("do for [i=0:" + iterations + "] {");
+            out.println("set title \'K-Średnich, iteracja \'.i");
+            out.print("plot \'" + this.outputFilePrefix + "_group" + 0 + "_it\'.i title \'Grupa " + 0 + "\'");
+            for (int i = 1; i < groups; i++) {
+                out.print(", \'" + this.outputFilePrefix + "_group" + i + "_it\'.i title \'Grupa " + i + "\'");
+            }
+            out.print(", \'_centroids\'.i title \'Centroidy\' pt 26 ps 3 lc rgb \"blue\"");
+
+            out.println();
+            out.println("}");
+            out.println();
+            out.close();
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+        }
     }
 }
