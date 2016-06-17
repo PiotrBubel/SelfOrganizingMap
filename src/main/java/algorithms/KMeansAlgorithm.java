@@ -28,6 +28,20 @@ public class KMeansAlgorithm {
         return randomized;
     }
 
+    private ClusteredPoint[] randomizeCentroidsFromInputs(int groups, List<ClusteredPoint> inputs) {
+        ClusteredPoint[] randomized = new ClusteredPoint[groups];
+        List<ClusteredPoint> tmp = new ArrayList<>();
+        tmp.addAll(inputs);
+
+        Random random = new Random();
+        for (int i = 0; i < randomized.length; i++) {
+            int index = random.nextInt(tmp.size());
+            randomized[i] = new ClusteredPoint(tmp.get(index).getX(), tmp.get(index).getY(), i);
+            tmp.remove(index);
+        }
+        return randomized;
+    }
+
     /**
      * @return group index where given point belongs (is closest to group center)
      */
@@ -43,9 +57,9 @@ public class KMeansAlgorithm {
         return group;
     }
 
-    private List<ClusteredPoint> processClustered(List<ClusteredPoint> input, int groups, int iterations) {
-        List<ClusteredPoint> clustered = new ArrayList<>();
-        this.groupCenters = randomizeCentroids(groups);
+    private List<ClusteredPoint> groupClustered(List<ClusteredPoint> input, int groups, int iterations) {
+        //this.groupCenters = randomizeCentroids(groups);
+        this.groupCenters = randomizeCentroidsFromInputs(groups, input);
 
         for (int it = 0; it < iterations; it++) {
             //przypisujemy punkty do srodkow skupien na podstawie odleglosci
@@ -54,10 +68,10 @@ public class KMeansAlgorithm {
             }
             //ustalamy nowe srodki skupien (srednia wspolrzednych)
             for (int i = 0; i < groupCenters.length; i++) {
-                groupCenters[i] = findNewCentroid(clustered, i);
+                groupCenters[i] = findNewCentroid(input, i);
             }
         }
-        return clustered;
+        return input;
     }
 
     private ClusteredPoint findNewCentroid(List<ClusteredPoint> points, int group) {
@@ -74,12 +88,11 @@ public class KMeansAlgorithm {
         return new ClusteredPoint(sumX / howMuch, sumY / howMuch, group);
     }
 
-    public List<ClusteredPoint> process(List<Point> input, int groups, int iterations) {
+    public List<ClusteredPoint> group(List<Point> input, int groups, int iterations) {
         List<ClusteredPoint> clustered = new ArrayList<>();
         for (Point p : input) {
             clustered.add(new ClusteredPoint(p.getX(), p.getY(), 0));
         }
-        return processClustered(clustered, groups, iterations);
+        return groupClustered(clustered, groups, iterations);
     }
-
 }
