@@ -84,6 +84,8 @@ public class KMeansAlgorithm {
 
     private List<ClusteredPoint> groupClustered(List<ClusteredPoint> input, int groups, int iterations) {
         this.groupCenters = randomizeCentroidsFromInputs(groups, input);
+        double lastError = Double.MAX_VALUE;
+        int realIterations = 0;
 
         for (int it = 0; it < iterations; it++) {
             //przypisujemy punkty do srodkow skupien na podstawie odleglosci
@@ -103,11 +105,21 @@ public class KMeansAlgorithm {
                 list.add(p);
             }
             FileUtils.saveListOfPoints("_centroids" + it, list);
+            double currentError = countError(input, groups);
             System.out.println("ended " + it + "iteration");
+            System.out.println("with error: " + currentError);
+            System.out.println();
+            realIterations++;
+            if(currentError == lastError){
+                System.out.println("error does not changed, algorithm ended");
+                break;
+            } else{
+                lastError = currentError;
+            }
         }
 
         String plotFile = "_plotAnimation";
-        savePlotCommand(groups, iterations, plotFile);
+        savePlotCommand(groups, realIterations, plotFile);
 
         try {
             Utils.runGnuplotScript(plotFile);
@@ -118,6 +130,26 @@ public class KMeansAlgorithm {
         deleteFiles(iterations, groups);
 
         return input;
+    }
+
+    private double countError(List<ClusteredPoint> points, int groups) {
+        double[] errors = new double[groups];
+        double[] counters = new double[groups];
+        for (int i = 0; i < groups; i++) {
+            errors[i] = 0d;
+            counters[i] = 0d;
+        }
+        for (ClusteredPoint p : points) {
+            int group = p.getGroup();
+            errors[group] = errors[group] + p.distanceTo(groupCenters[group]);
+            counters[group] = counters[group] + 1;
+        }
+        double globalError = 0d;
+        for (int i = 0; i < groups; i++) {
+            globalError = globalError + (errors[i] / counters[i]);
+        }
+
+        return globalError / groups;
     }
 
     private void deleteFiles(int iterations, int groups) {
@@ -155,7 +187,7 @@ public class KMeansAlgorithm {
             out.println("set key outside");
             iterations = iterations - 1;
             out.println("do for [i=0:" + iterations + "] {");
-            out.println("set title \'K-Średnich, iteracja \'.i");
+            out.println("set title \'k-średnich, iteracja \'.i");
             out.print("plot \'" + this.outputFilePrefix + "_group" + 0 + "_it\'.i title \'Grupa " + 0 + "\'");
             for (int i = 1; i < groups; i++) {
                 out.print(", \'" + this.outputFilePrefix + "_group" + i + "_it\'.i title \'Grupa " + i + "\'");

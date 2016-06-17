@@ -13,8 +13,7 @@ public class Main {
     public static void main(String[] args){
         System.out.println("Hello world");
 
-
-        List<Point> randomized = Utils.randomizePoints(20000, 0, 15, 0, 15);
+        List<Point> randomized = Utils.randomizePoints(5000, 0, 15, 0, 15);
         //randomized.addAll(Utils.randomizePoints(500, -10, -15, -10, -15));
         //randomized.addAll(Utils.randomizePoints(500, 0, 8, 0, 8));
         //randomized.addAll(Utils.randomizePoints(50, 40, 50, 40, 50));
