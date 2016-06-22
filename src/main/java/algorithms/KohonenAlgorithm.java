@@ -3,7 +3,7 @@ package algorithms;
 import java.util.ArrayList;
 import java.util.List;
 
-import points.Point;
+import dataset.Dataset;
 import utils.Utils;
 
 /**
@@ -11,16 +11,16 @@ import utils.Utils;
  */
 public class KohonenAlgorithm {
 
-    private List<Point> neurons;
+    private List<Dataset> neurons;
 
     public KohonenAlgorithm(int howMuch) {
         this.neurons = new ArrayList<>();
         this.neurons = Utils.randomizePoints(howMuch, 0, 5, 0, 5);
     }
 
-    public void process(List<Point> inputs){
+    public void process(List<Dataset> inputs){
 
-        for(Point p : inputs){
+        for(Dataset p : inputs){
 
         }
     }

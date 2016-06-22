@@ -18,16 +18,25 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import points.Point;
+import dataset.Dataset;
 
 public class FileUtils {
 
-    public static void saveListOfPoints(String filePath, List<Point> data) {
+    public static void saveListOfPoints(String filePath, List<Dataset> data) {
         try (PrintStream out = new PrintStream(new FileOutputStream(filePath))) {
             DecimalFormat df = new DecimalFormat("0.00000000");
-            for (Point point : data) {
-                if (!Double.isNaN(point.getY()) && !Double.isNaN(point.getX())) {
-                    out.print(df.format(point.getX()).replaceAll(",", ".") + " " + df.format(point.getY()).replaceAll(",", "."));
+            for (Dataset dataset : data) {
+                String toPrint = "";
+                boolean flag = true;
+                for (int i = 0; i < dataset.size(); i++) {
+                    if (!Double.isNaN(dataset.getValue(i)) && flag) {
+                        toPrint = toPrint + String.valueOf(dataset.getValue(i)).replaceAll(",", ".") + " ";
+                    } else {
+                        flag = false;
+                    }
+                }
+                if (flag) {
+                    out.print(toPrint);
                     out.println();
                 }
             }
@@ -36,15 +45,17 @@ public class FileUtils {
         }
     }
 
-    public static List<Point> loadPointsList(String filePath) {
-        List<Point> listOfLists = new ArrayList<>();
+    public static List<Dataset> loadPointsList(String filePath) {
+        List<Dataset> listOfLists = new ArrayList<>();
         try (Scanner sc = new Scanner(new FileReader(filePath))) {
             while (sc.hasNext()) {
                 String line = sc.nextLine();
                 String[] values = line.split(" ");
-                listOfLists.add(new Point(
-                        Double.parseDouble(values[0].replaceAll(",", ".")), //nie wiem czy nie odwrotnie . i ,
-                        Double.parseDouble(values[1].replaceAll(",", "."))));
+                double[] doubles = new double[values.length];
+                for (int i = 0; i < values.length; i++) {
+                    doubles[i] = Double.parseDouble(values[i].replaceAll(",", "."));
+                }
+                listOfLists.add(new Dataset(doubles));
             }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(FileUtils.class.getName()).log(Level.SEVERE, null, ex);
@@ -52,11 +63,12 @@ public class FileUtils {
         return listOfLists;
     }
 
-    public static void addPoint(String filePath, Point p) {
+    public static void addDataset(String filePath, Dataset p) {
         try (BufferedWriter out = new BufferedWriter(new FileWriter(filePath, true))) {
-            out.append(String.valueOf(p.getX()));
-            out.append(" ");
-            out.append(String.valueOf(p.getY()));
+            for (int i = 0; i < p.size(); i++) {
+                out.append(String.valueOf(p.getValue(i)));
+                out.append(" ");
+            }
             out.newLine();
 
         } catch (FileNotFoundException ex) {
