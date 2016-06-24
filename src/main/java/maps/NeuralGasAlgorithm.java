@@ -133,15 +133,15 @@ public class NeuralGasAlgorithm {
             out.println("set key outside");
             out.println("do for [i=0:" + iterations + "] {");
             out.println("set title \'Algorytm gazu neuronowego, iteracja \'.i");
-            out.print("plot \'" + this.outputFilePrefix + "_it\'.i title \'Neurony\'");
-            out.print(", \'" + this.outputFilePrefix + "_inputs\' title \'Wzorzec\'");
+            out.print("plot \'" + this.outputFilePrefix + "_inputs\' title \'Wzorzec\'");
+            out.print(", \'" + this.outputFilePrefix + "_it\'.i title \'Neurony\'");
             out.println();
             out.println("}");
 
             out.println("do for [i=0:30] {");
             out.println("set title \'Algorytm gazu neuronowego, iteracja " + iterations + "\'");
-            out.print("plot \'" + this.outputFilePrefix + "_it" + iterations + "\' title \'Neurony\'");
-            out.print(", \'" + this.outputFilePrefix + "_inputs\' title \'Wzorzec\'");
+            out.print("plot \'" + this.outputFilePrefix + "_inputs\' title \'Wzorzec\'");
+            out.print(",'" + this.outputFilePrefix + "_it" + iterations + "\' title \'Neurony\'");
             out.println();
             out.println("}");
 
