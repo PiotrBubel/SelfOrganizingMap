@@ -122,7 +122,7 @@ public class KMeans {
             }
         }
 
-        String plotFile = "_plotAnimation";
+        String plotFile = "_KMeans_plot";
         savePlotCommand(groups, realIterations, plotFile);
 
         try {
@@ -167,6 +167,8 @@ public class KMeans {
             }
 
         }
+        File f = new File("_KMeans_plot");
+        f.delete();
     }
 
     private void saveGroupsToFiles(List<ClusteredDataset> clustered, int iteration) {
@@ -186,7 +188,7 @@ public class KMeans {
 
     private void savePlotCommand(int groups, int iterations, String plotFilePath) {
         try (PrintStream out = new PrintStream(new FileOutputStream(plotFilePath))) {
-            out.println("set terminal gif animate delay 25");
+            out.println("set terminal gif animate delay 25 optimize");
             out.println("set output '" + outputFilePrefix + "_animation.gif" + "'");
             out.println("set key outside");
             iterations = iterations - 1;

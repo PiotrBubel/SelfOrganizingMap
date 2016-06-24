@@ -35,6 +35,8 @@ public class NeuralGasAlgorithm {
     private String outputFilePrefix = "_NeuralGas";
     private double learning_set_decrase_rate = 0d;
     private double lambda_decrase_rate = 0d;
+    private double lambda;
+    private double learningRate;
 
 
     public NeuralGasAlgorithm() {
@@ -59,11 +61,11 @@ public class NeuralGasAlgorithm {
         FileUtils.saveDatasetList(outputFilePrefix + "_inputs", inputs);
         FileUtils.saveNeuronsList(outputFilePrefix + "_it" + 0, neurons);
 
-        double learningRate = START_LEARNING_RATE;
-        double lambda = START_LAMBDA;
+        learningRate = START_LEARNING_RATE;
+        lambda = START_LAMBDA;
         for (int i = 1; i <= iterations; i++) {
             for (Dataset p : inputs) {
-                process(p, learningRate, lambda);
+                process(p);
             }
             learningRate = learningRate - learning_set_decrase_rate;
             lambda = lambda - lambda_decrase_rate;
@@ -95,7 +97,7 @@ public class NeuralGasAlgorithm {
     }
 
 
-    private void process(Dataset in, double learningRate, double lambda) {
+    private void process(Dataset in) {
         Collections.sort(neurons, new DatasetDistanceComparator(in));
 
         for (int i = 0; i < neurons.size(); i++) {
@@ -108,7 +110,6 @@ public class NeuralGasAlgorithm {
                 }
             } else {
                 neurons.get(i).moveForward(in, learningRate * Math.exp((double) -i / lambda));
-
             }
         }
     }
@@ -123,7 +124,7 @@ public class NeuralGasAlgorithm {
 
     private void savePlotCommand(int iterations, String plotFilePath) {
         try (PrintStream out = new PrintStream(new FileOutputStream(plotFilePath))) {
-            out.println("set terminal gif animate delay 10");
+            out.println("set terminal gif animate delay 10 optimize");
             out.println("set output '" + outputFilePrefix + "_animation.gif" + "'");
             out.println("set key outside");
             iterations = iterations - 1;

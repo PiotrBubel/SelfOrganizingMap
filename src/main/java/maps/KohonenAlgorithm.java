@@ -36,6 +36,8 @@ public class KohonenAlgorithm {
     private String outputFilePrefix = "_Kohonen";
     private double learning_rate_decrase_rate = 0d;
     private double lambda_decrase_rate = 0d;
+    private double lambda;
+    private double learningRate;
 
 
     public KohonenAlgorithm() {
@@ -72,11 +74,11 @@ public class KohonenAlgorithm {
         FileUtils.saveDatasetList(outputFilePrefix + "_inputs", inputs);
         FileUtils.saveNeuronsList(outputFilePrefix + "_it" + 0, neurons);
 
-        double learningRate = START_LEARNING_RATE;
-        double lambda = START_LAMBDA;
+        learningRate = START_LEARNING_RATE;
+        lambda = START_LAMBDA;
         for (int i = 1; i <= iterations; i++) {
             for (Dataset p : inputs) {
-                process(p, learningRate, lambda);
+                process(p);
             }
             learningRate = learningRate - learning_rate_decrase_rate;
             lambda = lambda - lambda_decrase_rate;
@@ -95,9 +97,11 @@ public class KohonenAlgorithm {
 
     public void runTwoPhaseAlgorithm(List<Dataset> inputs, int iterations, int howMuchNeurons) {
 
+        START_LAMBDA = howMuchNeurons / 2d;
+
         String tmpFile = this.outputFilePrefix;
         this.outputFilePrefix = outputFilePrefix + "2F";
-        int it1 = iterations / 2;
+        int it1 = iterations + (iterations / 2);
         this.initializeNeurons(howMuchNeurons, inputs.get(0).size());
         this.changeLearningRate(iterations);
         this.changeLambdaRate(iterations);
@@ -108,11 +112,11 @@ public class KohonenAlgorithm {
         FileUtils.saveDatasetList(outputFilePrefix + "_inputs", inputs);
         FileUtils.saveNeuronsList(outputFilePrefix + "_it" + 0, neurons);
 
-        double learningRate = START_LEARNING_RATE;
-        double lambda = START_LAMBDA;
-        for (int i = 1; i < it1; i++) {
+        learningRate = START_LEARNING_RATE;
+        lambda = START_LAMBDA;
+        for (int i = 1; i < iterations; i++) {
             for (Dataset p : inputs) {
-                process(p, learningRate, lambda);
+                process(p);
             }
             learningRate = learningRate - learning_rate_decrase_rate;
             lambda = lambda - lambda_decrase_rate;
@@ -123,24 +127,24 @@ public class KohonenAlgorithm {
         KohonenAlgorithm.WINNER_TAKES_ALL = true;
 
         //learningRate = START_LEARNING_RATE;
-        for (int i = it1; i <= iterations; i++) {
+        for (int i = iterations; i <= it1; i++) {
             for (Dataset p : inputs) {
-                process(p, learningRate, lambda);
+                process(p);
             }
-            learningRate = learningRate - learning_rate_decrase_rate;
-            lambda = lambda - lambda_decrase_rate;
+            //learningRate = learningRate - learning_rate_decrase_rate;
+            //lambda = lambda - lambda_decrase_rate;
             FileUtils.saveNeuronsList(outputFilePrefix + "_it" + i, neurons);
         }
 
 
-        savePlotCommand(iterations, outputFilePrefix + "_plot", true);
+        savePlotCommand(it1, outputFilePrefix + "_plot", true);
         try {
             Utils.runGnuplotScript(outputFilePrefix + "_plot");
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        deleteFiles(iterations);
+        deleteFiles(it1);
         this.outputFilePrefix = tmpFile;
     }
 
@@ -158,44 +162,41 @@ public class KohonenAlgorithm {
     }
 
 
-    private Neuron findWinner(List<Neuron> neurons, Dataset in) {
+    private Neuron findWinner(Dataset in) {
         List<Neuron> tmp2 = new ArrayList<>();
         tmp2.addAll(neurons);
         Collections.sort(tmp2, new DatasetDistanceComparator(in));
         return tmp2.get(0);
     }
 
-    private void process(Dataset in, double learningRate, double lambda) {
-        Neuron winner = findWinner(neurons, in);
-        winner.moveForward(in, learningRate);
+    private void process(Dataset in) {
+        Neuron winner = findWinner(in);
+        int winnerIndex = neurons.indexOf(winner);
+        neurons.get(winnerIndex).moveForward(in, learningRate);
         if (ENABLE_NEURON_POTENTIAL) {
             winner.decreasePotential(POTENTIAL_DECRASE_RATE);
-            for (Neuron n : neurons) {
-                if (n != winner) {
-                    n.rest(POTENTIAL_INCRASE_RATE);
+            for (int i = 0; i < neurons.size(); i++) {
+                if (i != winnerIndex) {
+                    neurons.get(i).rest(POTENTIAL_INCRASE_RATE);
                 }
             }
         }
 
         if (!WINNER_TAKES_ALL) {
-            int winnerIndex = neurons.indexOf(winner);
-
             for (int i = 0; i < neurons.size(); i++) {
                 if (i != winnerIndex) {
                     if (ENABLE_NEURON_POTENTIAL) {
-                        if (neurons.get(i).potential() > MIN_POTENTIAL) {
-                            neurons.get(i).moveForward(in, learningRate *
-                                    Math.exp(-(Utils.power(Math.abs(winnerIndex - i)))
-                                            / 2d * Utils.power(lambda)));
+                        if (neurons.get(i).potential() >= MIN_POTENTIAL) {
+                            double exp = Math.exp(-(Math.abs(Utils.power(winnerIndex - i))) / (2 * lambda * lambda));
+                            neurons.get(i).moveForward(in, learningRate * exp);
 
                             neurons.get(i).decreasePotential(POTENTIAL_DECRASE_RATE);
                         } else {
                             neurons.get(i).rest(POTENTIAL_INCRASE_RATE);
                         }
                     } else {
-                        neurons.get(i).moveForward(in, learningRate *
-                                Math.exp(-(Utils.power(Math.abs(winnerIndex - i)))
-                                        / 2d * Utils.power(lambda)));
+                        double exp = Math.exp(-(Math.abs(Utils.power(winnerIndex - i))) / (2 * lambda * lambda));
+                        neurons.get(i).moveForward(in, learningRate * exp);
                     }
                 }
             }
@@ -210,7 +211,7 @@ public class KohonenAlgorithm {
             header = "Algorytm Kohonena";
         }
         try (PrintStream out = new PrintStream(new FileOutputStream(plotFilePath))) {
-            out.println("set terminal gif animate delay 10");
+            out.println("set terminal gif animate delay 10 optimize");
             out.println("set output '" + outputFilePrefix + "_animation.gif" + "'");
             out.println("set key outside");
             iterations = iterations - 1;

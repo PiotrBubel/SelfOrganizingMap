@@ -70,6 +70,7 @@ public class Utils {
         gnuplot = Runtime.getRuntime().exec("gnuplot " + scriptName);
         try {
             gnuplot.waitFor();
+            System.out.println("executed script " + scriptName);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
