@@ -12,34 +12,34 @@ public class Dataset {
     public static double MIN_FIRST_VAL = -15d;
     public static double MAX_FIRST_VAL = 15d;
 
-    protected double[] values;
+    protected double[] weights;
 
     public Dataset(double[] x) {
-        this.values = x;
+        this.weights = x;
     }
 
     public Dataset() {
-        values = new double[]{0d, 0d};
+        weights = new double[]{0d, 0d};
     }
 
     public Dataset(int x) {
-        values = new double[x];
+        weights = new double[x];
         Random r = new Random();
         for (int i = 0; i < size(); i++) {
-            values[i] = Dataset.MIN_FIRST_VAL + (Dataset.MAX_FIRST_VAL - Dataset.MIN_FIRST_VAL) * r.nextDouble();
+            weights[i] = Dataset.MIN_FIRST_VAL + (Dataset.MAX_FIRST_VAL - Dataset.MIN_FIRST_VAL) * r.nextDouble();
         }
     }
 
-    public double[] getValues() {
-        return values;
+    public double[] getWeights() {
+        return weights;
     }
 
     public double getValue(int index) {
-        return values[index];
+        return weights[index];
     }
 
     public int size() {
-        return values.length;
+        return weights.length;
     }
 
     /**
@@ -58,7 +58,7 @@ public class Dataset {
     }
 
     public Neuron toNeuron() {
-        return new Neuron(this.values);
+        return new Neuron(this.weights);
     }
 
 }
