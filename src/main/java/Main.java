@@ -56,7 +56,27 @@ public class Main {
         kohonen.runAlgorithm(randomized, 120, 150);
 
         KohonenAlgorithm kohonen1 = new KohonenAlgorithm();
-        kohonen1.runTwoPhaseAlgorithm(randomized, 120, 150);
+        kohonen1.runTwoPhaseAlgorithm(randomized, 80, 150);
+
+/*
+        String fileName = "image2.jpg";
+
+        byte[] image = FileUtils.loadImageByte(fileName);
+
+        double[] d = Utils.byteArrayToDouble(image);
+        List<Dataset> l = Utils.doubleArrayToDatasets(d);
+
+        kohonen.runAlgorithm(l, 10, 25 * 25);
+        double[] koh = Utils.neuronsToDoubleArray(kohonen.getNeurons());
+        byte[] loaded = Utils.doubleArrayToBytes(koh);
+
+        System.out.println(loaded.length);
+        System.out.println(image.length);
+        FileUtils.saveImage(loaded, "_KOHONEN_" + fileName);
+*/
+        //byte[] b = Utils.doubleArrayToBytes(d);
+
+        //FileUtils.saveImage(b, "_" + fileName);
 
 
         //List<ClusteredDataset> clustered = kmeans.runAlgorithm(randomized, 16, 80);

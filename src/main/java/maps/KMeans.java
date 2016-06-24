@@ -188,7 +188,7 @@ public class KMeans {
 
     private void savePlotCommand(int groups, int iterations, String plotFilePath) {
         try (PrintStream out = new PrintStream(new FileOutputStream(plotFilePath))) {
-            out.println("set terminal gif animate delay 25 optimize");
+            out.println("set terminal gif animate delay 20");
             out.println("set output '" + outputFilePrefix + "_animation.gif" + "'");
             out.println("set key outside");
             iterations = iterations - 1;
@@ -202,6 +202,20 @@ public class KMeans {
 
             out.println();
             out.println("}");
+
+
+            out.println("do for [i=0:15] {");
+            out.println("set title \'k-średnich, iteracja " + iterations + "\'");
+            out.print("plot \'" + this.outputFilePrefix + "_group" + 0 + "_it" + iterations + "\' title \'Grupa " + 0 + "\'");
+            for (int i = 1; i < groups; i++) {
+                out.print(", \'" + this.outputFilePrefix + "_group" + i + "_it" + iterations + "\' title \'Grupa " + i + "\'");
+            }
+            out.print(", \'_centroids" + iterations + "\' title \'Centroidy\' pt 26 ps 3 lc rgb \"blue\"");
+
+            out.println();
+            out.println("}");
+
+
             out.println();
             out.close();
         } catch (FileNotFoundException ex) {
