@@ -35,7 +35,7 @@ public class Neuron extends Dataset {
             return;
         }
         for (int i = 0; i < size(); i++) {
-            this.values[i] = values[i] + step * (destination.getValue(i) - values[i]);
+            this.weights[i] = weights[i] + step * (destination.getValue(i) - weights[i]);
         }
     }
 

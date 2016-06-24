@@ -18,20 +18,24 @@ import utils.Utils;
 /**
  * Created by Piotrek on 16.06.2016.
  */
-public class NeuralGasAlgorithm extends KohonenAlgorithm {
+public class NeuralGasAlgorithm {
 
     public static double START_LEARNING_RATE = 0.5d;
-    public static double LEARNING_RATE_DECREASE_STEP = 0.01;
-    public static double DISTANCE_LEARNING_RATE_FACTOR = 1d;
-    public static boolean ENABLE_NEURON_POTENTIAL = true;
-    //public static double LAMBDA = 0.5d;
-    public static double MIN_POTENTIAL = 0.7d;
+    public static double MIN_LEARNING_RATE = 0.05d;
+    public static double START_LAMBDA = 0.5d;
+    public static double MIN_LAMBDA = 0.05d;
+
+    public static boolean ENABLE_NEURON_POTENTIAL = false;
+    public static double MIN_POTENTIAL = 0.75d;
     public static double POTENTIAL_INCRASE_RATE = 0.1d;
-    public static double POTENTIAL_DECRASE_RATE = 0.1d;
+    public static double POTENTIAL_DECRASE_RATE = 0.5d;
 
 
-    protected List<Neuron> neurons;
-    protected String outputFilePrefix = "_NeuralGas";
+    private List<Neuron> neurons;
+    private String outputFilePrefix = "_NeuralGas";
+    private double learning_set_decrase_rate = 0d;
+    private double lambda_decrase_rate = 0d;
+
 
     public NeuralGasAlgorithm() {
         this.neurons = null;
@@ -46,19 +50,31 @@ public class NeuralGasAlgorithm extends KohonenAlgorithm {
 
     public void runAlgorithm(List<Dataset> inputs, int iterations, int howMuchNeurons) {
 
+
+        START_LAMBDA = howMuchNeurons / 2d;
+        MIN_LAMBDA = 0.01;
+        START_LEARNING_RATE = 0.5d;
+        MIN_LEARNING_RATE = 0.005d;
+
         this.initializeNeurons(howMuchNeurons, inputs.get(0).size());
+        this.changeLearningSetRate(iterations);
+        this.changeLambdaRate(iterations);
 
         FileUtils.saveDatasetList(outputFilePrefix + "_inputs", inputs);
         FileUtils.saveNeuronsList(outputFilePrefix + "_it" + 0, neurons);
 
         double learningRate = START_LEARNING_RATE;
+        double lambda = START_LAMBDA;
         for (int i = 1; i <= iterations; i++) {
             for (Dataset p : inputs) {
-                process(p, learningRate);
+                process(p, learningRate, lambda);
             }
-            if (!(learningRate <= LEARNING_RATE_DECREASE_STEP)) {
-                learningRate = learningRate - LEARNING_RATE_DECREASE_STEP;
-            }
+            learningRate = learningRate - learning_set_decrase_rate;
+            lambda = lambda - lambda_decrase_rate;
+
+            //System.out.println("lambda:" + lambda);
+            //System.out.println("krok: " + learningRate);
+
             FileUtils.saveNeuronsList(outputFilePrefix + "_it" + i, neurons);
         }
 
@@ -86,7 +102,7 @@ public class NeuralGasAlgorithm extends KohonenAlgorithm {
     }
 
 
-    private void process(Dataset in, double learningRate) {
+    private void process(Dataset in, double learningRate, double lambda) {
         List<Neuron> tmp = new ArrayList<>();
         if (ENABLE_NEURON_POTENTIAL) {
             tmp.addAll(neuronsWithHighPotential(neurons));
@@ -95,15 +111,10 @@ public class NeuralGasAlgorithm extends KohonenAlgorithm {
         }
         Collections.sort(tmp, new DatasetDistanceComparator(in));
 
-        if (DISTANCE_LEARNING_RATE_FACTOR < 1d) {
-            DISTANCE_LEARNING_RATE_FACTOR = 1d;
-        }
-
         for (int i = 0; i < neurons.size(); i++) {
-            double x = i + DISTANCE_LEARNING_RATE_FACTOR;
-            tmp.get(i).moveForward(in, learningRate * (1d / x));
+            tmp.get(i).moveForward(in, learningRate * Math.exp((double) -i / lambda));
             if (ENABLE_NEURON_POTENTIAL) {
-                tmp.get(0).decreasePotential(POTENTIAL_DECRASE_RATE);
+                tmp.get(i).decreasePotential(POTENTIAL_DECRASE_RATE);
             }
         }
 
@@ -124,9 +135,25 @@ public class NeuralGasAlgorithm extends KohonenAlgorithm {
         return tmp;
     }
 
+    //private double neibourghoodFunction(int index, double lambda) {
+    //    return Math.exp((-1d * index) / (lambda));
+    //}
+
+    //private void changeCurrentLambda(int currentIteration, int iterations) {
+    //    currentLambda = lambdaZero - lambdaZero * (currentIteration / iterations);
+    //}
+
+    private void changeLearningSetRate(int iterations) {
+        this.learning_set_decrase_rate = (START_LEARNING_RATE - MIN_LEARNING_RATE) / (double) iterations;
+    }
+
+    private void changeLambdaRate(int iterations) {
+        this.lambda_decrase_rate = (START_LAMBDA - MIN_LAMBDA) / (double) iterations;
+    }
+
     private void savePlotCommand(int iterations, String plotFilePath) {
         try (PrintStream out = new PrintStream(new FileOutputStream(plotFilePath))) {
-            out.println("set terminal gif animate delay 50");
+            out.println("set terminal gif animate delay 10");
             out.println("set output '" + outputFilePrefix + "_animation.gif" + "'");
             out.println("set key outside");
             iterations = iterations - 1;

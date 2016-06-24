@@ -47,14 +47,14 @@ public class KMeans {
         Random random = new Random();
         for (int i = 0; i < randomized.length; i++) {
             int index = random.nextInt(tmp.size());
-            randomized[i] = new ClusteredDataset(tmp.get(index).getValues(), i);
+            randomized[i] = new ClusteredDataset(tmp.get(index).getWeights(), i);
             tmp.remove(index);
         }
         return randomized;
     }
 
     /**
-     * @return group index where given point belongs (is closest to group center)
+     * @return runAlgorithm index where given point belongs (is closest to runAlgorithm center)
      */
     private int belongsTo(Dataset p) {
         int group = 0;
@@ -109,12 +109,13 @@ public class KMeans {
             }
             FileUtils.saveDatasetList("_centroids" + it, list);
             double currentError = countError(input, groups);
-            System.out.println("ended " + it + "iteration");
-            System.out.println("with error: " + currentError);
-            System.out.println();
+            //System.out.println("ended " + it + "iteration");
+            //System.out.println("with error: " + currentError);
+            //System.out.println();
             realIterations++;
             if (currentError == lastError) {
                 System.out.println("error does not changed, algorithm ended");
+                System.out.println("with error: " + currentError);
                 break;
             } else {
                 lastError = currentError;
@@ -175,10 +176,10 @@ public class KMeans {
         }
     }
 
-    public List<ClusteredDataset> group(List<Dataset> input, int groups, int iterations) {
+    public List<ClusteredDataset> runAlgorithm(List<Dataset> input, int iterations, int groups) {
         List<ClusteredDataset> clustered = new ArrayList<>();
         for (Dataset p : input) {
-            clustered.add(new ClusteredDataset(p.getValues(), 0));
+            clustered.add(new ClusteredDataset(p.getWeights(), 0));
         }
         return groupClustered(clustered, groups, iterations);
     }

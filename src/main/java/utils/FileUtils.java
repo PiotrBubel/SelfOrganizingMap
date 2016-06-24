@@ -108,9 +108,9 @@ public class FileUtils {
                 int l = 0;
                 while (sc.hasNext()) {
                     String line = sc.nextLine();
-                    String[] values = line.split(" ");
+                    String[] weights = line.split(" ");
                     listOfLists.add(new ArrayList<Double>());
-                    for (String v : values) {
+                    for (String v : weights) {
                         listOfLists.get(l).add(Double.parseDouble(v.replaceAll(",", ".")));
                     }
                     l++;
