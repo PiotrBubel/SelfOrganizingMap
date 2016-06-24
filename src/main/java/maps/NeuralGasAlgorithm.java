@@ -50,11 +50,7 @@ public class NeuralGasAlgorithm {
 
     public void runAlgorithm(List<Dataset> inputs, int iterations, int howMuchNeurons) {
 
-
         START_LAMBDA = howMuchNeurons / 2d;
-        MIN_LAMBDA = 0.01;
-        START_LEARNING_RATE = 0.5d;
-        MIN_LEARNING_RATE = 0.005d;
 
         this.initializeNeurons(howMuchNeurons, inputs.get(0).size());
         this.changeLearningSetRate(iterations);
@@ -103,24 +99,25 @@ public class NeuralGasAlgorithm {
 
 
     private void process(Dataset in, double learningRate, double lambda) {
-        List<Neuron> tmp = new ArrayList<>();
-        if (ENABLE_NEURON_POTENTIAL) {
-            tmp.addAll(neuronsWithHighPotential(neurons));
-        } else {
-            tmp.addAll(neurons);
-        }
-        Collections.sort(tmp, new DatasetDistanceComparator(in));
+        //List<Neuron> tmp = new ArrayList<>();
+        //if (ENABLE_NEURON_POTENTIAL) {
+        //    tmp.addAll(neuronsWithHighPotential(neurons));
+        //} else {
+        //    tmp.addAll(neurons);
+        //}
+        Collections.sort(neurons, new DatasetDistanceComparator(in));
 
         for (int i = 0; i < neurons.size(); i++) {
-            tmp.get(i).moveForward(in, learningRate * Math.exp((double) -i / lambda));
             if (ENABLE_NEURON_POTENTIAL) {
-                tmp.get(i).decreasePotential(POTENTIAL_DECRASE_RATE);
-            }
-        }
+                if (neurons.get(i).potential() > MIN_POTENTIAL) {
+                    neurons.get(i).moveForward(in, learningRate * Math.exp((double) -i / lambda));
+                    neurons.get(i).decreasePotential(POTENTIAL_DECRASE_RATE);
+                } else {
+                    neurons.get(i).rest(POTENTIAL_INCRASE_RATE);
+                }
+            } else {
+                neurons.get(i).moveForward(in, learningRate * Math.exp((double) -i / lambda));
 
-        for (Neuron n : neurons) {
-            if (ENABLE_NEURON_POTENTIAL && !tmp.contains(n)) {
-                n.rest(POTENTIAL_INCRASE_RATE);
             }
         }
     }

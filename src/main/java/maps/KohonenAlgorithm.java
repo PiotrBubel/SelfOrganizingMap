@@ -64,9 +64,6 @@ public class KohonenAlgorithm {
     public void runAlgorithm(List<Dataset> inputs, int iterations, int howMuchNeurons) {
 
         START_LAMBDA = howMuchNeurons / 2d;
-        MIN_LAMBDA = 0.01;
-        START_LEARNING_RATE = 0.05d;
-        MIN_LEARNING_RATE = 0.005d;
 
         this.initializeNeurons(howMuchNeurons, inputs.get(0).size());
         this.changeLambdaRate(iterations);
@@ -172,56 +169,41 @@ public class KohonenAlgorithm {
     }
 
     private void process(Dataset in, double learningRate, double lambda) {
-        List<Neuron> tmp = new ArrayList<>();
-        if (ENABLE_NEURON_POTENTIAL) {
-            tmp.addAll(neuronsWithHighPotential(neurons));
-        } else {
-            tmp.addAll(neurons);
-        }
-
-        //bierzemy najblizszego wzorca - zwyciezce
         Neuron winner = findWinner(neurons, in);
         winner.moveForward(in, learningRate);
         if (ENABLE_NEURON_POTENTIAL) {
             winner.decreasePotential(POTENTIAL_DECRASE_RATE);
-        }
-
-        if (!WINNER_TAKES_ALL) {
-            tmp.remove(winner);
-            //Collections.sort(tmp, new DatasetDistanceComparator(winner));
-            int winnerIndex = neurons.indexOf(winner);
-
-            for (int i = 0; i < tmp.size(); i++) {
-                //System.out.println(gaussianNeibourghood(in, tmp.get(i)));
-                tmp.get(i).moveForward(in, learningRate *
-                        Math.exp(-(Utils.power(Math.abs(winnerIndex - i)))
-                                / 2d * Utils.power(lambda)));
-                if (ENABLE_NEURON_POTENTIAL) {
-                    tmp.get(0).decreasePotential(POTENTIAL_DECRASE_RATE);
+            for (Neuron n : neurons) {
+                if (n != winner) {
+                    n.rest(POTENTIAL_INCRASE_RATE);
                 }
             }
         }
 
-        for (Neuron n : neurons) {
-            if (ENABLE_NEURON_POTENTIAL && !tmp.contains(n) && !winner.equals(n)) {
-                n.rest(POTENTIAL_INCRASE_RATE);
+        if (!WINNER_TAKES_ALL) {
+            int winnerIndex = neurons.indexOf(winner);
+
+            for (int i = 0; i < neurons.size(); i++) {
+                if (i != winnerIndex) {
+                    if (ENABLE_NEURON_POTENTIAL) {
+                        if (neurons.get(i).potential() > MIN_POTENTIAL) {
+                            neurons.get(i).moveForward(in, learningRate *
+                                    Math.exp(-(Utils.power(Math.abs(winnerIndex - i)))
+                                            / 2d * Utils.power(lambda)));
+
+                            neurons.get(i).decreasePotential(POTENTIAL_DECRASE_RATE);
+                        } else {
+                            neurons.get(i).rest(POTENTIAL_INCRASE_RATE);
+                        }
+                    } else {
+                        neurons.get(i).moveForward(in, learningRate *
+                                Math.exp(-(Utils.power(Math.abs(winnerIndex - i)))
+                                        / 2d * Utils.power(lambda)));
+                    }
+                }
             }
         }
     }
-
-    private List<Neuron> neuronsWithHighPotential(List<Neuron> list) {
-        ArrayList<Neuron> tmp = new ArrayList<>();
-        for (Neuron n : list) {
-            if (n.potential() >= MIN_POTENTIAL) {
-                tmp.add(n);
-            }
-        }
-        return tmp;
-    }
-
-    //private double gaussianNeibourghood(Dataset in, Neuron ne, double lambda) {
-    //    return Math.exp(-1d * (Utils.power(ne.distanceTo(in)) / 2d * Utils.power(lambda)));
-    //}
 
     private void savePlotCommand(int iterations, String plotFilePath, boolean twoPhase) {
         String header;
