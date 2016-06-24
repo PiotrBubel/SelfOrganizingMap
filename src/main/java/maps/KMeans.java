@@ -1,4 +1,4 @@
-package algorithms;
+package maps;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,7 +17,7 @@ import utils.Utils;
 /**
  * Created by Piotrek on 16.06.2016.
  */
-public class KMeansAlgorithm {
+public class KMeans {
 
     public static double minX, minY = -2d;
     public static double maxX, maxY = 2d;
@@ -107,7 +107,7 @@ public class KMeansAlgorithm {
             for (ClusteredDataset p : groupCenters) {
                 list.add(p);
             }
-            FileUtils.saveListOfPoints("_centroids" + it, list);
+            FileUtils.saveDatasetList("_centroids" + it, list);
             double currentError = countError(input, groups);
             System.out.println("ended " + it + "iteration");
             System.out.println("with error: " + currentError);
@@ -171,7 +171,7 @@ public class KMeansAlgorithm {
     private void saveGroupsToFiles(List<ClusteredDataset> clustered, int iteration) {
         List<List<Dataset>> l = Utils.splitClusteredPoints(clustered);
         for (int i = 0; i < l.size(); i++) {
-            FileUtils.saveListOfPoints(this.outputFilePrefix + "_group" + i + "_it" + iteration, l.get(i));
+            FileUtils.saveDatasetList(this.outputFilePrefix + "_group" + i + "_it" + iteration, l.get(i));
         }
     }
 
