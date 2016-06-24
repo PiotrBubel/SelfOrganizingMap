@@ -1,5 +1,7 @@
 package dataset;
 
+import java.util.Random;
+
 import utils.Utils;
 
 /**
@@ -7,7 +9,10 @@ import utils.Utils;
  */
 public class Dataset {
 
-    private double[] values;
+    public static double MIN_FIRST_VAL = -15d;
+    public static double MAX_FIRST_VAL = 15d;
+
+    protected double[] values;
 
     public Dataset(double[] x) {
         this.values = x;
@@ -15,6 +20,14 @@ public class Dataset {
 
     public Dataset() {
         values = new double[]{0d, 0d};
+    }
+
+    public Dataset(int x) {
+        values = new double[x];
+        Random r = new Random();
+        for (int i = 0; i < size(); i++) {
+            values[i] = Dataset.MIN_FIRST_VAL + (Dataset.MAX_FIRST_VAL - Dataset.MIN_FIRST_VAL) * r.nextDouble();
+        }
     }
 
     public double[] getValues() {
@@ -42,6 +55,10 @@ public class Dataset {
             sum = sum + Utils.power(this.getValue(i) - other.getValue(i));
         }
         return Math.sqrt(sum);
+    }
+
+    public Neuron toNeuron() {
+        return new Neuron(this.values);
     }
 
 }

@@ -19,13 +19,37 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import dataset.Dataset;
+import dataset.Neuron;
 
 public class FileUtils {
 
-    public static void saveListOfPoints(String filePath, List<Dataset> data) {
+    public static void saveDatasetList(String filePath, List<Dataset> data) {
         try (PrintStream out = new PrintStream(new FileOutputStream(filePath))) {
             DecimalFormat df = new DecimalFormat("0.00000000");
             for (Dataset dataset : data) {
+                String toPrint = "";
+                boolean flag = true;
+                for (int i = 0; i < dataset.size(); i++) {
+                    if (!Double.isNaN(dataset.getValue(i)) && flag) {
+                        toPrint = toPrint + String.valueOf(dataset.getValue(i)).replaceAll(",", ".") + " ";
+                    } else {
+                        flag = false;
+                    }
+                }
+                if (flag) {
+                    out.print(toPrint);
+                    out.println();
+                }
+            }
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(FileUtils.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public static void saveNeuronsList(String filePath, List<Neuron> data) {
+        try (PrintStream out = new PrintStream(new FileOutputStream(filePath))) {
+            DecimalFormat df = new DecimalFormat("0.00000000");
+            for (Neuron dataset : data) {
                 String toPrint = "";
                 boolean flag = true;
                 for (int i = 0; i < dataset.size(); i++) {
