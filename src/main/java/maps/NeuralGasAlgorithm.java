@@ -22,6 +22,7 @@ public class NeuralGasAlgorithm extends KohonenAlgorithm {
 
     public static double START_LEARNING_RATE = 0.5d;
     public static double LEARNING_RATE_DECREASE_STEP = 0.01;
+    public static double DISTANCE_LEARNING_RATE_FACTOR = 1d;
     public static boolean ENABLE_NEURON_POTENTIAL = true;
     //public static double LAMBDA = 0.5d;
     public static double MIN_POTENTIAL = 0.7d;
@@ -51,7 +52,7 @@ public class NeuralGasAlgorithm extends KohonenAlgorithm {
         FileUtils.saveNeuronsList(outputFilePrefix + "_it" + 0, neurons);
 
         double learningRate = START_LEARNING_RATE;
-        for (int i = 1; i < iterations; i++) {
+        for (int i = 1; i <= iterations; i++) {
             for (Dataset p : inputs) {
                 process(p, learningRate);
             }
@@ -76,7 +77,7 @@ public class NeuralGasAlgorithm extends KohonenAlgorithm {
         f.delete();
         f = new File(outputFilePrefix + "_it" + 0);
         f.delete();
-        for (int i = 1; i < iterations; i++) {
+        for (int i = 1; i <= iterations; i++) {
             f = new File(outputFilePrefix + "_it" + i);
             f.delete();
         }
@@ -94,8 +95,12 @@ public class NeuralGasAlgorithm extends KohonenAlgorithm {
         }
         Collections.sort(tmp, new DatasetDistanceComparator(in));
 
+        if (DISTANCE_LEARNING_RATE_FACTOR < 1d) {
+            DISTANCE_LEARNING_RATE_FACTOR = 1d;
+        }
+
         for (int i = 0; i < neurons.size(); i++) {
-            double x = i + 1d;
+            double x = i + DISTANCE_LEARNING_RATE_FACTOR;
             tmp.get(i).moveForward(in, learningRate * (1d / x));
             if (ENABLE_NEURON_POTENTIAL) {
                 tmp.get(0).decreasePotential(POTENTIAL_DECRASE_RATE);

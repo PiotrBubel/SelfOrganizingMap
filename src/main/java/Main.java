@@ -28,14 +28,14 @@ public class Main {
         KMeans kmeans = new KMeans();
 
         NeuralGasAlgorithm ngas = new NeuralGasAlgorithm();
-        ngas.runAlgorithm(randomized, 75, 100);
+        ngas.runAlgorithm(randomized, 40, 60);
         //wzorce, epoki, neurony
 
         KohonenAlgorithm kohonen = new KohonenAlgorithm();
-        kohonen.runAlgorithm(randomized, 75, 100);
+        kohonen.runAlgorithm(randomized, 40, 60);
 
         KohonenAlgorithm kohonen1 = new KohonenAlgorithm();
-        kohonen1.runTwoPhaseAlgorithm(randomized, 75, 100);
+        kohonen1.runTwoPhaseAlgorithm(randomized, 40, 60);
         //List<ClusteredDataset> clustered = kmeans.group(randomized, 16, 80);
 
         System.out.println("..");
