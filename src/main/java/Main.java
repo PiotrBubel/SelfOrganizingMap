@@ -21,10 +21,12 @@ public class Main {
         Dataset.MIN_FIRST_VAL = min;
 
         List<Dataset> randomized = new ArrayList<>();
-        //randomized.addAll(Utils.randomizePoints(250, 2 * min - 10, 2 * max - 10, 2 * min - 10, 2 * max - 10));
-        //randomized.addAll(Utils.randomizePoints(250, 2 * min + 10, 2 * max + 10, 2 * min + 10, 2 * max + 10));
+        randomized.addAll(Utils.randomizePoints(250, 2 * min - 10, 2 * max - 10, 2 * min - 10, 2 * max - 10));
+        randomized.addAll(Utils.randomizePoints(250, 2 * min + 10, 2 * max + 10, 2 * min + 10, 2 * max + 10));
+        randomized.addAll(Utils.randomizePoints(200, 2 * min - 10, 2 * max + 10, 2 * min - 10, 2 * max + 10));
+
         //randomized.addAll(Utils.randomizePoints(100, min-1, max+1, min-1, max+1));
-        randomized.addAll(Utils.randomizePoints(500, min, max, min, max));
+        //randomized.addAll(Utils.randomizePoints(500, min, max, min, max));
 
 
         //randomized.addAll(Utils.randomizePoints(500, 0, 8, 0, 8));
