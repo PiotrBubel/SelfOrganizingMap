@@ -80,9 +80,6 @@ public class KohonenAlgorithm {
             }
             learningRate = learningRate - learning_rate_decrase_rate;
             lambda = lambda - lambda_decrase_rate;
-            //System.out.println("lambda:" +lambda);
-            //System.out.println("krok: " + learningRate);
-
             FileUtils.saveNeuronsList(outputFilePrefix + "_it" + i, neurons);
         }
 

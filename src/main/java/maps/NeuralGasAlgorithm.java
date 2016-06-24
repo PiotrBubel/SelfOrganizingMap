@@ -68,9 +68,6 @@ public class NeuralGasAlgorithm {
             learningRate = learningRate - learning_set_decrase_rate;
             lambda = lambda - lambda_decrase_rate;
 
-            //System.out.println("lambda:" + lambda);
-            //System.out.println("krok: " + learningRate);
-
             FileUtils.saveNeuronsList(outputFilePrefix + "_it" + i, neurons);
         }
 
@@ -99,12 +96,6 @@ public class NeuralGasAlgorithm {
 
 
     private void process(Dataset in, double learningRate, double lambda) {
-        //List<Neuron> tmp = new ArrayList<>();
-        //if (ENABLE_NEURON_POTENTIAL) {
-        //    tmp.addAll(neuronsWithHighPotential(neurons));
-        //} else {
-        //    tmp.addAll(neurons);
-        //}
         Collections.sort(neurons, new DatasetDistanceComparator(in));
 
         for (int i = 0; i < neurons.size(); i++) {
@@ -121,24 +112,6 @@ public class NeuralGasAlgorithm {
             }
         }
     }
-
-    private List<Neuron> neuronsWithHighPotential(List<Neuron> list) {
-        ArrayList<Neuron> tmp = new ArrayList<>();
-        for (Neuron n : list) {
-            if (n.potential() >= MIN_POTENTIAL) {
-                tmp.add(n);
-            }
-        }
-        return tmp;
-    }
-
-    //private double neibourghoodFunction(int index, double lambda) {
-    //    return Math.exp((-1d * index) / (lambda));
-    //}
-
-    //private void changeCurrentLambda(int currentIteration, int iterations) {
-    //    currentLambda = lambdaZero - lambdaZero * (currentIteration / iterations);
-    //}
 
     private void changeLearningSetRate(int iterations) {
         this.learning_set_decrase_rate = (START_LEARNING_RATE - MIN_LEARNING_RATE) / (double) iterations;
