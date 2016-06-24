@@ -3,6 +3,9 @@
 target/
 _*
 *.png
+*.jpg
+*.jpeg
+*.gif
 .idea
 
 # Mobile Tools for Java (J2ME)

@@ -43,6 +43,10 @@ public class NeuralGasAlgorithm {
         this.neurons = null;
     }
 
+    public List<Neuron> getNeurons() {
+        return neurons;
+    }
+
     private void initializeNeurons(int howMuch, int dimentions) {
         this.neurons = new ArrayList<>();
         for (int i = 0; i < howMuch; i++) {
@@ -124,16 +128,23 @@ public class NeuralGasAlgorithm {
 
     private void savePlotCommand(int iterations, String plotFilePath) {
         try (PrintStream out = new PrintStream(new FileOutputStream(plotFilePath))) {
-            out.println("set terminal gif animate delay 10 optimize");
+            out.println("set terminal gif animate delay 10");
             out.println("set output '" + outputFilePrefix + "_animation.gif" + "'");
             out.println("set key outside");
-            iterations = iterations - 1;
             out.println("do for [i=0:" + iterations + "] {");
             out.println("set title \'Algorytm gazu neuronowego, iteracja \'.i");
             out.print("plot \'" + this.outputFilePrefix + "_it\'.i title \'Neurony\'");
             out.print(", \'" + this.outputFilePrefix + "_inputs\' title \'Wzorzec\'");
             out.println();
             out.println("}");
+
+            out.println("do for [i=0:30] {");
+            out.println("set title \'Algorytm gazu neuronowego, iteracja " + iterations + "\'");
+            out.print("plot \'" + this.outputFilePrefix + "_it" + iterations + "\' title \'Neurony\'");
+            out.print(", \'" + this.outputFilePrefix + "_inputs\' title \'Wzorzec\'");
+            out.println();
+            out.println("}");
+
             out.println();
             out.close();
         } catch (FileNotFoundException ex) {

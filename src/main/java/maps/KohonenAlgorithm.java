@@ -32,6 +32,7 @@ public class KohonenAlgorithm {
     public static double POTENTIAL_INCRASE_RATE = 0.1d;
     public static double POTENTIAL_DECRASE_RATE = 0.5d;
 
+
     private List<Neuron> neurons;
     private String outputFilePrefix = "_Kohonen";
     private double learning_rate_decrase_rate = 0d;
@@ -42,6 +43,10 @@ public class KohonenAlgorithm {
 
     public KohonenAlgorithm() {
         this.neurons = null;
+    }
+
+    public List<Neuron> getNeurons() {
+        return neurons;
     }
 
     public void setOutputFileName(String i) {
@@ -211,16 +216,22 @@ public class KohonenAlgorithm {
             header = "Algorytm Kohonena";
         }
         try (PrintStream out = new PrintStream(new FileOutputStream(plotFilePath))) {
-            out.println("set terminal gif animate delay 10 optimize");
+            out.println("set terminal gif animate delay 10");
             out.println("set output '" + outputFilePrefix + "_animation.gif" + "'");
             out.println("set key outside");
-            iterations = iterations - 1;
             out.println("do for [i=0:" + iterations + "] {");
             out.println("set title \'" + header + ", iteracja \'.i");
             out.print("plot \'" + this.outputFilePrefix + "_it\'.i title \'Neurony\'");
             out.print(", \'" + this.outputFilePrefix + "_inputs\' title \'Wzorzec\'");
             out.println();
             out.println("}");
+            out.println("do for [i=0:30] {");
+            out.println("set title \'" + header + ", iteracja " + iterations + "\'");
+            out.print("plot \'" + this.outputFilePrefix + "_it" + iterations + "\' title \'Neurony\'");
+            out.print(", \'" + this.outputFilePrefix + "_inputs\' title \'Wzorzec\'");
+            out.println();
+            out.println("}");
+
             out.println();
             out.close();
         } catch (FileNotFoundException ex) {
