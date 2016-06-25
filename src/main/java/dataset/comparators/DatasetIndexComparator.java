@@ -12,6 +12,6 @@ public class DatasetIndexComparator implements Comparator<Dataset> {
 
     @Override
     public int compare(Dataset o1, Dataset o2) {
-        return Double.compare(o1.getIndex(), o2.getIndex());
+        return Integer.compare(o1.getIndex(), o2.getIndex());
     }
 }

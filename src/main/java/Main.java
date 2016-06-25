@@ -23,11 +23,11 @@ public class Main {
         Dataset.MIN_FIRST_VAL = min;
 
         List<Dataset> randomized = new ArrayList<>();
-        randomized.addAll(Utils.randomizePoints(1, 2 * min - 10, 2 * max - 10, 2 * min - 10, 2 * max - 10));
-        randomized.addAll(Utils.randomizePoints(1, 2 * min + 10, 2 * max + 10, 2 * min + 10, 2 * max + 10));
+        randomized.addAll(Utils.randomizePoints(100, 2 * min - 10, 2 * max - 10, 2 * min - 10, 2 * max - 10));
+        randomized.addAll(Utils.randomizePoints(100, 2 * min + 10, 2 * max + 10, 2 * min + 10, 2 * max + 10));
         randomized.addAll(Utils.randomizePoints(100, 2 * min - 10, 2 * max + 10, 2 * min - 10, 2 * max + 10));
 
-        boolean grafy = false;
+        boolean grafy = true;
         boolean obrazki = true;
 
         if (grafy) {
@@ -42,7 +42,7 @@ public class Main {
             NeuralGasAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
 
             NeuralGasAlgorithm ngas = new NeuralGasAlgorithm();
-            ngas.runAlgorithm(randomized, 200, 150);
+            ngas.runAlgorithm(randomized, 200, 200);
             //wzorce, epoki, neurony
 
 
@@ -53,10 +53,10 @@ public class Main {
             KohonenAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
 
             KohonenAlgorithm kohonen = new KohonenAlgorithm();
-            kohonen.runAlgorithm(randomized, 200, 150);
+            kohonen.runAlgorithm(randomized, 200, 200);
 
             KohonenAlgorithm kohonen1 = new KohonenAlgorithm();
-            kohonen1.runTwoPhaseAlgorithm(randomized, 80, 150);
+            kohonen1.runTwoPhaseAlgorithm(randomized, 140, 200);
 
 
             Kohonen2DAlgorithm.MIN_LAMBDA = 0.01;
@@ -66,28 +66,28 @@ public class Main {
             Kohonen2DAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
 
             Kohonen2DAlgorithm kohonen2d = new Kohonen2DAlgorithm();
-            kohonen2d.runAlgorithm(randomized, 200, 15, 15);
+            kohonen2d.runAlgorithm(randomized, 200, 20, 10);
 
             Kohonen2DAlgorithm kohonen2d2 = new Kohonen2DAlgorithm();
-            kohonen2d2.runTwoPhaseAlgorithm(randomized, 140, 15, 15);
+            kohonen2d2.runTwoPhaseAlgorithm(randomized, 140, 20, 10);
         }
 
         if (obrazki) {
             ImageUtils.test();
 
 
-            String inImage = "image2.jpg";
-            int x = 5;
+            String inImage = "image.jpg";
+            int x = 10;
             int y = x;
             int epochs = 2000;
 
             KMeans kmeans = new KMeans();
-            kmeans.runAlgorithmOnImage(inImage, "_kmeans_chunks.png", epochs, x, y);
+            //kmeans.runAlgorithmOnImage(inImage, "_kmeans_chunks.png", epochs, x, y);
 
 
             KohonenAlgorithm.MIN_LAMBDA = 0.01;
-            KohonenAlgorithm.START_LEARNING_RATE = 0.5d;
-            KohonenAlgorithm.MIN_LEARNING_RATE = 0.05d;
+            KohonenAlgorithm.START_LEARNING_RATE = 0.08d;
+            KohonenAlgorithm.MIN_LEARNING_RATE = 0.03d;
             KohonenAlgorithm.ENABLE_NEURON_POTENTIAL = false;
             KohonenAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
             KohonenAlgorithm koh = new KohonenAlgorithm();
@@ -96,20 +96,19 @@ public class Main {
 
 
             NeuralGasAlgorithm.MIN_LAMBDA = 0.01;
-            NeuralGasAlgorithm.START_LEARNING_RATE = 0.5d;
-            NeuralGasAlgorithm.MIN_LEARNING_RATE = 0.01d;
+            NeuralGasAlgorithm.START_LEARNING_RATE = 0.08d;
+            NeuralGasAlgorithm.MIN_LEARNING_RATE = 0.03d;
             NeuralGasAlgorithm.ENABLE_NEURON_POTENTIAL = false;
             NeuralGasAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
             NeuralGasAlgorithm gas = new NeuralGasAlgorithm();
             gas.runAlgorithmOnImage(inImage, "_gas_chunks.png", epochs, x, y);
-            gas.runAlgorithmOnImage("image2.jpg", "_gas_chunks2.png", 2000, 5, 5);
 
             System.out.println("gas");
 
 
             Kohonen2DAlgorithm.MIN_LAMBDA = 0.01;
-            Kohonen2DAlgorithm.START_LEARNING_RATE = 0.5d;
-            Kohonen2DAlgorithm.MIN_LEARNING_RATE = 0.05d;
+            Kohonen2DAlgorithm.START_LEARNING_RATE = 0.08d;
+            Kohonen2DAlgorithm.MIN_LEARNING_RATE = 0.03d;
             Kohonen2DAlgorithm.ENABLE_NEURON_POTENTIAL = false;
             Kohonen2DAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
             Kohonen2DAlgorithm koh2d = new Kohonen2DAlgorithm();
