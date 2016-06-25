@@ -11,7 +11,9 @@ import java.util.Random;
 
 import dataset.ClusteredDataset;
 import dataset.Dataset;
+import dataset.Neuron;
 import utils.FileUtils;
+import utils.ImageUtils;
 import utils.Utils;
 
 /**
@@ -230,28 +232,26 @@ public class KMeans {
         }
         return groupClustered(clustered, groups, iterations);
     }
-/*
-    public void runAlgorithmOnImage(String inImage, String outImage, int iterations, int groups) {
-        BufferedImage imageLoaded = ImageUtils.loadImage(inImage);
-        List<Dataset> d = ImageUtils.convertToDatasets(imageLoaded);
+
+
+    public void runAlgorithmOnImage(String inImage, String outImage, int iterations, int rows, int columns) {
+        List<Dataset> d = ImageUtils.datasetsFromImage(inImage, rows, columns);
 
         List<ClusteredDataset> clustered = new ArrayList<>();
         for (Dataset p : d) {
             clustered.add(new ClusteredDataset(p.getWeights(), 0));
         }
 
-        this.groupClustered(clustered, groups, iterations);
+        this.groupClusteredWithoutGraph(clustered, rows * columns, iterations);
 
         List<Neuron> neurons = new ArrayList<>();
         for (int i = 0; i < groupCenters.length; i++) {
             neurons.add(new Neuron(groupCenters[i].getWeights()));
         }
-
-        BufferedImage map = ImageUtils.neuronsToImage(neurons, imageLoaded.getWidth(), imageLoaded.getHeight());
-        ImageUtils.saveImage(outImage, map);
+        ImageUtils.neuronsToImage(neurons, d, outImage);
 
     }
-*/
+
     private void savePlotCommand(int groups, int iterations, String plotFilePath) {
         try (PrintStream out = new PrintStream(new FileOutputStream(plotFilePath))) {
             out.println("set terminal gif animate delay 20");

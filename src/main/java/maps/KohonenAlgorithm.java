@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 import dataset.Dataset;
-import dataset.DatasetDistanceComparator;
+import dataset.comparators.DatasetDistanceComparator;
 import dataset.Neuron;
 import utils.FileUtils;
 import utils.ImageUtils;
@@ -214,33 +214,20 @@ public class KohonenAlgorithm {
 
         }
     }
+
     public void runAlgorithmOnImage(String inImage, String outImage, int iterations, int rows, int columns) {
         List<Dataset> d = ImageUtils.datasetsFromImage(inImage, rows, columns);
 
         this.runAlgorithmWithoutGraph(d, iterations, rows * columns);
         ImageUtils.neuronsToImage(this.neurons, d, outImage);
     }
-    /*
-    public void runAlgorithmOnImage(String inImage, String outImage, int iterations, int howMuchNeurons) {
-        BufferedImage imageLoaded = ImageUtils.loadImage(inImage);
-        List<Dataset> d = ImageUtils.convertToDatasets(imageLoaded);
 
-        this.runAlgorithmWithoutGraph(d, iterations, howMuchNeurons);
+    public void runTwoPhaseAlgorithmOnImage(String inImage, String outImage, int iterations, int rows, int columns) {
+        List<Dataset> d = ImageUtils.datasetsFromImage(inImage, rows, columns);
 
-        BufferedImage map = ImageUtils.neuronsToImage(this.getNeurons(), imageLoaded.getWidth(), imageLoaded.getHeight());
-        ImageUtils.saveImage(outImage, map);
+        this.runTwoPhaseAlgorithmWithoutGraph(d, iterations, rows * columns);
+        ImageUtils.neuronsToImage(this.neurons, d, outImage);
     }
-
-    public void runTwoPhaseAlgorithmOnImage(String inImage, String outImage, int iterations, int howMuchNeurons) {
-        BufferedImage imageLoaded = ImageUtils.loadImage(inImage);
-        List<Dataset> d = ImageUtils.convertToDatasets(imageLoaded);
-
-        this.runTwoPhaseAlgorithmWithoutGraph(d, iterations, howMuchNeurons);
-
-        BufferedImage map = ImageUtils.neuronsToImage(this.getNeurons(), imageLoaded.getWidth(), imageLoaded.getHeight());
-        ImageUtils.saveImage(outImage, map);
-    }
-    */
 
     private void deleteFiles(int iterations) {
         File f = new File(outputFilePrefix + "_inputs");

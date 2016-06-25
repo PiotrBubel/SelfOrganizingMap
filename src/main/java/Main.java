@@ -75,10 +75,15 @@ public class Main {
         if (obrazki) {
             ImageUtils.test();
 
-            String inImage = "image.jpg";
-            int x = 20;
+
+            String inImage = "image2.jpg";
+            int x = 5;
             int y = x;
             int epochs = 2000;
+
+            KMeans kmeans = new KMeans();
+            kmeans.runAlgorithmOnImage(inImage, "_kmeans_chunks.png", epochs, x, y);
+
 
             KohonenAlgorithm.MIN_LAMBDA = 0.01;
             KohonenAlgorithm.START_LEARNING_RATE = 0.5d;
@@ -97,7 +102,7 @@ public class Main {
             NeuralGasAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
             NeuralGasAlgorithm gas = new NeuralGasAlgorithm();
             gas.runAlgorithmOnImage(inImage, "_gas_chunks.png", epochs, x, y);
-            //gas.runAlgorithmOnImage("image2.jpg", "_gas_chunks2.png", 2000, 5, 5);
+            gas.runAlgorithmOnImage("image2.jpg", "_gas_chunks2.png", 2000, 5, 5);
 
             System.out.println("gas");
 

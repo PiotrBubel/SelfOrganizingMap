@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 import dataset.Dataset;
-import dataset.DatasetDistanceComparator;
+import dataset.comparators.DatasetDistanceComparator;
 import dataset.Neuron;
 import utils.FileUtils;
 import utils.ImageUtils;
@@ -89,6 +89,8 @@ public class NeuralGasAlgorithm {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        //ImageUtils.neuronsToWoronoiDiagram(neurons, 800, 800, outputFilePrefix + "_voronoi_diagram.png");
 
         deleteFiles(iterations);
     }

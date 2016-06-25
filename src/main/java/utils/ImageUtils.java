@@ -7,12 +7,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 
 import dataset.Dataset;
-import dataset.DatasetDistanceComparator;
-import dataset.DatasetIndexComparator;
+import dataset.comparators.DatasetDistanceComparator;
+import dataset.comparators.DatasetIndexComparator;
 import dataset.Neuron;
 
 /**
@@ -140,15 +141,16 @@ public class ImageUtils {
     }
 
 
-    public static BufferedImage neuronsToImageWoronoi(List<Neuron> neurons, int[] colors, int width, int height) {
+    public static void neuronsToWoronoiDiagram(List<Neuron> neurons, int width, int height, String imageName) {
         BufferedImage image = new BufferedImage(width, height, imageType);
+        int[] colors = ImageUtils.randomizeTab(neurons.size());
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 double minDistance = Double.MAX_VALUE;
                 int winnerRGB = 0;
                 for (int n = 0; n < neurons.size(); n++) {
                     double[] weights = neurons.get(n).getWeights();
-                    double distance = distance((int) weights[0], (int) weights[1], i, j);
+                    double distance = distance((int) weights[0] * 100, (int) weights[1] * 100, i, j);
                     if (distance < minDistance) {
                         winnerRGB = colors[n];
                         minDistance = distance;
@@ -157,7 +159,16 @@ public class ImageUtils {
                 image.setRGB(i, j, winnerRGB);
             }
         }
-        return image;
+        ImageUtils.saveImage(imageName, image);
+    }
+
+    private static int[] randomizeTab(int hm) {
+        int[] tab = new int[hm];
+        Random rndm = new Random();
+        for (int i = 0; i < hm; i++) {
+            tab[i] = rndm.nextInt();
+        }
+        return tab;
     }
 
     private static double distance(int x1, int y1, int x2, int y2) {
