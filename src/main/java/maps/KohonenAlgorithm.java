@@ -13,6 +13,7 @@ import dataset.Dataset;
 import dataset.DatasetDistanceComparator;
 import dataset.Neuron;
 import utils.FileUtils;
+import utils.ImageUtils;
 import utils.Utils;
 
 /**
@@ -24,19 +25,14 @@ public class KohonenAlgorithm {
 
     public static double START_LEARNING_RATE = 0.5d;
     public static double MIN_LEARNING_RATE = 0.05d;
-    public static double START_LAMBDA = 0.5d;
     public static double MIN_LAMBDA = 0.05d;
-
     public static boolean ENABLE_NEURON_POTENTIAL = false;
     public static double MIN_POTENTIAL = 0.75d;
     public static double POTENTIAL_INCRASE_RATE = 0.1d;
     public static double POTENTIAL_DECRASE_RATE = 0.5d;
-
-
+    public static double START_LAMBDA = 0.5d;
     private List<Neuron> neurons;
     private String outputFilePrefix = "_Kohonen";
-    private double learning_rate_decrase_rate = 0d;
-    private double lambda_decrase_rate = 0d;
     private double lambda;
     private double learningRate;
 
@@ -60,39 +56,43 @@ public class KohonenAlgorithm {
         }
     }
 
-    private void changeLambdaRate(int iterations) {
-        this.lambda_decrase_rate = (START_LAMBDA - MIN_LAMBDA) / (double) iterations;
-    }
-
-    private void changeLearningRate(int iterations) {
-        this.learning_rate_decrase_rate = (START_LEARNING_RATE - MIN_LEARNING_RATE) / (double) iterations;
-    }
-
     public void runAlgorithm(List<Dataset> inputs, int iterations, int howMuchNeurons) {
 
         START_LAMBDA = howMuchNeurons / 2d;
 
         this.initializeNeurons(howMuchNeurons, inputs.get(0).size());
-        this.changeLambdaRate(iterations);
-        this.changeLearningRate(iterations);
 
+        File f = new File(outputFilePrefix + "_errors");
+        f.delete();
         FileUtils.saveDatasetList(outputFilePrefix + "_inputs", inputs);
         FileUtils.saveNeuronsList(outputFilePrefix + "_it" + 0, neurons);
 
         learningRate = START_LEARNING_RATE;
         lambda = START_LAMBDA;
+        double error = 0d;
         for (int i = 1; i <= iterations; i++) {
             for (Dataset p : inputs) {
                 process(p);
             }
-            learningRate = learningRate - learning_rate_decrase_rate;
-            lambda = lambda - lambda_decrase_rate;
+            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
+            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
+
             FileUtils.saveNeuronsList(outputFilePrefix + "_it" + i, neurons);
+            error = countError(inputs);
+            FileUtils.addDataset(outputFilePrefix + "_errors", new Dataset(new double[]{i, error}));
         }
+
 
         savePlotCommand(iterations, outputFilePrefix + "_plot", false);
         try {
             Utils.runGnuplotScript(outputFilePrefix + "_plot");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        saveErrorPlotCommand(outputFilePrefix + "_error_plot", outputFilePrefix + "_errors", false);
+        try {
+            Utils.runGnuplotScript(outputFilePrefix + "_error_plot");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -103,13 +103,12 @@ public class KohonenAlgorithm {
     public void runTwoPhaseAlgorithm(List<Dataset> inputs, int iterations, int howMuchNeurons) {
 
         START_LAMBDA = howMuchNeurons / 2d;
-
         String tmpFile = this.outputFilePrefix;
         this.outputFilePrefix = outputFilePrefix + "2F";
-        int it1 = iterations + (iterations / 2);
+        File f = new File(outputFilePrefix + "_errors");
+        f.delete();
+        int it1 = iterations + (iterations / 2) + 100;
         this.initializeNeurons(howMuchNeurons, inputs.get(0).size());
-        this.changeLearningRate(iterations);
-        this.changeLambdaRate(iterations);
 
 
         //FAZA 1
@@ -119,26 +118,32 @@ public class KohonenAlgorithm {
 
         learningRate = START_LEARNING_RATE;
         lambda = START_LAMBDA;
+        double error = 0d;
         for (int i = 1; i < iterations; i++) {
             for (Dataset p : inputs) {
                 process(p);
             }
-            learningRate = learningRate - learning_rate_decrase_rate;
-            lambda = lambda - lambda_decrase_rate;
+            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
+            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
+
             FileUtils.saveNeuronsList(outputFilePrefix + "_it" + i, neurons);
+            error = countError(inputs);
+            FileUtils.addDataset(outputFilePrefix + "_errors", new Dataset(new double[]{i, error}));
         }
 
         //FAZA 2
         KohonenAlgorithm.WINNER_TAKES_ALL = true;
 
-        //learningRate = START_LEARNING_RATE;
         for (int i = iterations; i <= it1; i++) {
             for (Dataset p : inputs) {
                 process(p);
             }
-            //learningRate = learningRate - learning_rate_decrase_rate;
-            //lambda = lambda - lambda_decrase_rate;
+            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
+            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
+
             FileUtils.saveNeuronsList(outputFilePrefix + "_it" + i, neurons);
+            error = countError(inputs);
+            FileUtils.addDataset(outputFilePrefix + "_errors", new Dataset(new double[]{i, error}));
         }
 
 
@@ -149,9 +154,93 @@ public class KohonenAlgorithm {
             e.printStackTrace();
         }
 
+        saveErrorPlotCommand(outputFilePrefix + "_error_plot", outputFilePrefix + "_errors", true);
+        try {
+            Utils.runGnuplotScript(outputFilePrefix + "_error_plot");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         deleteFiles(it1);
         this.outputFilePrefix = tmpFile;
     }
+
+    public void runAlgorithmWithoutGraph(List<Dataset> inputs, int iterations, int howMuchNeurons) {
+
+        START_LAMBDA = howMuchNeurons / 2d;
+
+        this.initializeNeurons(howMuchNeurons, inputs.get(0).size());
+
+        learningRate = START_LEARNING_RATE;
+        lambda = START_LAMBDA;
+        double error = 0d;
+        for (int i = 1; i <= iterations; i++) {
+            for (Dataset p : inputs) {
+                process(p);
+            }
+            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
+            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
+
+        }
+    }
+
+    public void runTwoPhaseAlgorithmWithoutGraph(List<Dataset> inputs, int iterations, int howMuchNeurons) {
+
+        START_LAMBDA = howMuchNeurons / 2d;
+        int it1 = iterations + (iterations / 2);
+        this.initializeNeurons(howMuchNeurons, inputs.get(0).size());
+
+        //FAZA 1
+        KohonenAlgorithm.WINNER_TAKES_ALL = false;
+        learningRate = START_LEARNING_RATE;
+        lambda = START_LAMBDA;
+        for (int i = 1; i < iterations; i++) {
+            for (Dataset p : inputs) {
+                process(p);
+            }
+            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
+            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
+        }
+
+        //FAZA 2
+        KohonenAlgorithm.WINNER_TAKES_ALL = true;
+
+        for (int i = iterations; i <= it1; i++) {
+            for (Dataset p : inputs) {
+                process(p);
+            }
+            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) it1);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
+            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) it1);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
+
+        }
+    }
+    public void runAlgorithmOnImage(String inImage, String outImage, int iterations, int rows, int columns) {
+        List<Dataset> d = ImageUtils.datasetsFromImage(inImage, rows, columns);
+
+        this.runAlgorithmWithoutGraph(d, iterations, rows * columns);
+        ImageUtils.neuronsToImage(this.neurons, d, outImage);
+    }
+    /*
+    public void runAlgorithmOnImage(String inImage, String outImage, int iterations, int howMuchNeurons) {
+        BufferedImage imageLoaded = ImageUtils.loadImage(inImage);
+        List<Dataset> d = ImageUtils.convertToDatasets(imageLoaded);
+
+        this.runAlgorithmWithoutGraph(d, iterations, howMuchNeurons);
+
+        BufferedImage map = ImageUtils.neuronsToImage(this.getNeurons(), imageLoaded.getWidth(), imageLoaded.getHeight());
+        ImageUtils.saveImage(outImage, map);
+    }
+
+    public void runTwoPhaseAlgorithmOnImage(String inImage, String outImage, int iterations, int howMuchNeurons) {
+        BufferedImage imageLoaded = ImageUtils.loadImage(inImage);
+        List<Dataset> d = ImageUtils.convertToDatasets(imageLoaded);
+
+        this.runTwoPhaseAlgorithmWithoutGraph(d, iterations, howMuchNeurons);
+
+        BufferedImage map = ImageUtils.neuronsToImage(this.getNeurons(), imageLoaded.getWidth(), imageLoaded.getHeight());
+        ImageUtils.saveImage(outImage, map);
+    }
+    */
 
     private void deleteFiles(int iterations) {
         File f = new File(outputFilePrefix + "_inputs");
@@ -164,8 +253,21 @@ public class KohonenAlgorithm {
         }
         f = new File(outputFilePrefix + "_plot");
         f.delete();
+        f = new File(outputFilePrefix + "_error_plot");
+        f.delete();
+        f = new File(outputFilePrefix + "_errors");
+        f.delete();
+
     }
 
+    public double countError(List<Dataset> in) {
+        double sum = 0d;
+        for (Dataset d : in) {
+            Neuron winner = findWinner(d);
+            sum = sum + winner.distanceTo(d);
+        }
+        return sum / in.size();
+    }
 
     private Neuron findWinner(Dataset in) {
         List<Neuron> tmp2 = new ArrayList<>();
@@ -209,6 +311,7 @@ public class KohonenAlgorithm {
     }
 
     private void savePlotCommand(int iterations, String plotFilePath, boolean twoPhase) {
+
         String header;
         if (twoPhase) {
             header = "Dwufazowy algorytm Kohonena";
@@ -236,6 +339,29 @@ public class KohonenAlgorithm {
             out.close();
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
+        }
+    }
+
+    private void saveErrorPlotCommand(String plotFilePath, String pointsPathT, boolean twoPhase) {
+        String header;
+        if (twoPhase) {
+            header = "Dwufazowy algorytm Kohonena";
+        } else {
+            header = "Algorytm Kohonena";
+        }
+        try (PrintStream out = new PrintStream(new FileOutputStream(plotFilePath))) {
+            out.println("set terminal png size 640,480");
+            out.println("set output '" + outputFilePrefix + "_error.png'");
+            out.println("set yrange [0:15]");
+            out.println("set ylabel \'Wartosc bledu\'");
+            out.println("set xlabel \'Epoki\'");
+
+            out.println("set title \"" + header + "\"");
+            //out.println("set key outside");
+            out.println("set style data lines");
+            out.println("plot \"" + pointsPathT + "\" title \"Sredni blad kwantyzacji\", \\");
+            out.println();
+        } catch (FileNotFoundException ex) {
         }
     }
 }

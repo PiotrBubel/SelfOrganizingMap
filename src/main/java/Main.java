@@ -22,81 +22,92 @@ public class Main {
         Dataset.MIN_FIRST_VAL = min;
 
         List<Dataset> randomized = new ArrayList<>();
-        randomized.addAll(Utils.randomizePoints(250, 2 * min - 10, 2 * max - 10, 2 * min - 10, 2 * max - 10));
-        randomized.addAll(Utils.randomizePoints(250, 2 * min + 10, 2 * max + 10, 2 * min + 10, 2 * max + 10));
-        randomized.addAll(Utils.randomizePoints(200, 2 * min - 10, 2 * max + 10, 2 * min - 10, 2 * max + 10));
+        randomized.addAll(Utils.randomizePoints(1, 2 * min - 10, 2 * max - 10, 2 * min - 10, 2 * max - 10));
+        randomized.addAll(Utils.randomizePoints(1, 2 * min + 10, 2 * max + 10, 2 * min + 10, 2 * max + 10));
+        randomized.addAll(Utils.randomizePoints(100, 2 * min - 10, 2 * max + 10, 2 * min - 10, 2 * max + 10));
 
-        //randomized.addAll(Utils.randomizePoints(100, min-1, max+1, min-1, max+1));
-        //randomized.addAll(Utils.randomizePoints(500, min, max, min, max));
+        boolean grafy = false;
+        boolean obrazki = true;
 
-
-        //randomized.addAll(Utils.randomizePoints(500, 0, 8, 0, 8));
-        //randomized.addAll(Utils.randomizePoints(50, 40, 50, 40, 50));
-        //randomized.addAll(Utils.randomizePoints(5, -30, -20, -30, -20));
-
-        KMeans kmeans = new KMeans();
-        //kmeans.runAlgorithm(randomized, 40, 9);
+        if (grafy) {
+            KMeans kmeans = new KMeans();
+            kmeans.runAlgorithm(randomized, 40, 9);
 
 
-        NeuralGasAlgorithm.MIN_LAMBDA = 0.01;
-        NeuralGasAlgorithm.START_LEARNING_RATE = 0.5d;
-        NeuralGasAlgorithm.MIN_LEARNING_RATE = 0.1d;
-        NeuralGasAlgorithm.ENABLE_NEURON_POTENTIAL = false;
-        NeuralGasAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
+            NeuralGasAlgorithm.MIN_LAMBDA = 0.01;
+            NeuralGasAlgorithm.START_LEARNING_RATE = 0.8d;
+            NeuralGasAlgorithm.MIN_LEARNING_RATE = 0.03d;
+            NeuralGasAlgorithm.ENABLE_NEURON_POTENTIAL = false;
+            NeuralGasAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
 
-        NeuralGasAlgorithm ngas = new NeuralGasAlgorithm();
-        //ngas.runAlgorithm(randomized, 120, 150);
-        //wzorce, epoki, neurony
-
-
-        KohonenAlgorithm.MIN_LAMBDA = 0.01;
-        KohonenAlgorithm.START_LEARNING_RATE = 0.1d;
-        KohonenAlgorithm.MIN_LEARNING_RATE = 0.005d;
-        KohonenAlgorithm.ENABLE_NEURON_POTENTIAL = false;
-        KohonenAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
-
-        KohonenAlgorithm kohonen = new KohonenAlgorithm();
-        //kohonen.runAlgorithm(randomized, 120, 150);
-
-        KohonenAlgorithm kohonen1 = new KohonenAlgorithm();
-        //kohonen1.runTwoPhaseAlgorithm(randomized, 80, 150);
+            NeuralGasAlgorithm ngas = new NeuralGasAlgorithm();
+            ngas.runAlgorithm(randomized, 200, 150);
+            //wzorce, epoki, neurony
 
 
+            KohonenAlgorithm.MIN_LAMBDA = 0.01;
+            KohonenAlgorithm.START_LEARNING_RATE = 0.08d;
+            KohonenAlgorithm.MIN_LEARNING_RATE = 0.03d;
+            KohonenAlgorithm.ENABLE_NEURON_POTENTIAL = false;
+            KohonenAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
 
-        Kohonen2DAlgorithm.MIN_LAMBDA = 0.001;
-        Kohonen2DAlgorithm.START_LEARNING_RATE = 0.05d;
-        Kohonen2DAlgorithm.MIN_LEARNING_RATE = 0.005d;
-        Kohonen2DAlgorithm.ENABLE_NEURON_POTENTIAL = false;
-        Kohonen2DAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
+            KohonenAlgorithm kohonen = new KohonenAlgorithm();
+            kohonen.runAlgorithm(randomized, 200, 150);
 
-        Kohonen2DAlgorithm kohonen2d = new Kohonen2DAlgorithm();
-        kohonen2d.runAlgorithm(randomized, 120, 15, 15);
-
-        Kohonen2DAlgorithm kohonen2d2 = new Kohonen2DAlgorithm();
-        kohonen2d2.runTwoPhaseAlgorithm(randomized, 80, 15, 15);
-/*
-        String fileName = "image2.jpg";
-
-        byte[] image = FileUtils.loadImageByte(fileName);
-
-        double[] d = Utils.byteArrayToDouble(image);
-        List<Dataset> l = Utils.doubleArrayToDatasets(d);
-
-        kohonen.runAlgorithm(l, 10, 25 * 25);
-        double[] koh = Utils.neuronsToDoubleArray(kohonen.getNeurons());
-        byte[] loaded = Utils.doubleArrayToBytes(koh);
-
-        System.out.println(loaded.length);
-        System.out.println(image.length);
-        FileUtils.saveImage(loaded, "_KOHONEN_" + fileName);
-*/
-        //byte[] b = Utils.doubleArrayToBytes(d);
-
-        //FileUtils.saveImage(b, "_" + fileName);
+            KohonenAlgorithm kohonen1 = new KohonenAlgorithm();
+            kohonen1.runTwoPhaseAlgorithm(randomized, 80, 150);
 
 
-        //List<ClusteredDataset> clustered = kmeans.runAlgorithm(randomized, 16, 80);
+            Kohonen2DAlgorithm.MIN_LAMBDA = 0.01;
+            Kohonen2DAlgorithm.START_LEARNING_RATE = 0.08d;
+            Kohonen2DAlgorithm.MIN_LEARNING_RATE = 0.03d;
+            Kohonen2DAlgorithm.ENABLE_NEURON_POTENTIAL = false;
+            Kohonen2DAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
 
+            Kohonen2DAlgorithm kohonen2d = new Kohonen2DAlgorithm();
+            kohonen2d.runAlgorithm(randomized, 200, 15, 15);
+
+            Kohonen2DAlgorithm kohonen2d2 = new Kohonen2DAlgorithm();
+            kohonen2d2.runTwoPhaseAlgorithm(randomized, 140, 15, 15);
+        }
+
+        if (obrazki) {
+            String inImage = "photo.jpg";
+
+            KohonenAlgorithm.MIN_LAMBDA = 0.01;
+            KohonenAlgorithm.START_LEARNING_RATE = 0.5d;
+            KohonenAlgorithm.MIN_LEARNING_RATE = 0.05d;
+            KohonenAlgorithm.ENABLE_NEURON_POTENTIAL = false;
+            KohonenAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
+            KohonenAlgorithm koh = new KohonenAlgorithm();
+            koh.runAlgorithmOnImage("image.jpg", "_gas_chunks1_koh.png", 2000, 10, 10);
+            System.out.println("koh");
+
+
+            NeuralGasAlgorithm.MIN_LAMBDA = 0.01;
+            NeuralGasAlgorithm.START_LEARNING_RATE = 0.5d;
+            NeuralGasAlgorithm.MIN_LEARNING_RATE = 0.01d;
+            NeuralGasAlgorithm.ENABLE_NEURON_POTENTIAL = false;
+            NeuralGasAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
+            NeuralGasAlgorithm gas = new NeuralGasAlgorithm();
+            //gas.runAlgorithmOnImage("image.jpg", "_gas_chunks1.png", 2000, 10, 10);
+            //gas.runAlgorithmOnImage("image2.jpg", "_gas_chunks2.png", 2000, 5, 5);
+
+            System.out.println("gas");
+
+
+            Kohonen2DAlgorithm.MIN_LAMBDA = 0.01;
+            Kohonen2DAlgorithm.START_LEARNING_RATE = 0.5d;
+            Kohonen2DAlgorithm.MIN_LEARNING_RATE = 0.05d;
+            Kohonen2DAlgorithm.ENABLE_NEURON_POTENTIAL = false;
+            Kohonen2DAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
+            Kohonen2DAlgorithm koh2d = new Kohonen2DAlgorithm();
+            //koh2d.runAlgorithmOnImage(inImage, "_koh2d_p.png", 500, 48, 48);
+            System.out.println("koh2");
+
+        }
         System.out.println("..");
     }
+
+
 }

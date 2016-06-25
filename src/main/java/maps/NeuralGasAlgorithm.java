@@ -13,6 +13,7 @@ import dataset.Dataset;
 import dataset.DatasetDistanceComparator;
 import dataset.Neuron;
 import utils.FileUtils;
+import utils.ImageUtils;
 import utils.Utils;
 
 /**
@@ -22,19 +23,14 @@ public class NeuralGasAlgorithm {
 
     public static double START_LEARNING_RATE = 0.5d;
     public static double MIN_LEARNING_RATE = 0.05d;
-    public static double START_LAMBDA = 0.5d;
     public static double MIN_LAMBDA = 0.05d;
-
     public static boolean ENABLE_NEURON_POTENTIAL = false;
     public static double MIN_POTENTIAL = 0.75d;
     public static double POTENTIAL_INCRASE_RATE = 0.1d;
     public static double POTENTIAL_DECRASE_RATE = 0.5d;
-
-
+    private static double START_LAMBDA = 0.5d;
     private List<Neuron> neurons;
     private String outputFilePrefix = "_NeuralGas";
-    private double learning_set_decrase_rate = 0d;
-    private double lambda_decrase_rate = 0d;
     private double lambda;
     private double learningRate;
 
@@ -59,23 +55,27 @@ public class NeuralGasAlgorithm {
         START_LAMBDA = howMuchNeurons / 2d;
 
         this.initializeNeurons(howMuchNeurons, inputs.get(0).size());
-        this.changeLearningSetRate(iterations);
-        this.changeLambdaRate(iterations);
+        File f = new File(outputFilePrefix + "_errors");
+        f.delete();
 
         FileUtils.saveDatasetList(outputFilePrefix + "_inputs", inputs);
         FileUtils.saveNeuronsList(outputFilePrefix + "_it" + 0, neurons);
 
         learningRate = START_LEARNING_RATE;
         lambda = START_LAMBDA;
+        double error = 0d;
         for (int i = 1; i <= iterations; i++) {
             for (Dataset p : inputs) {
                 process(p);
             }
-            learningRate = learningRate - learning_set_decrase_rate;
-            lambda = lambda - lambda_decrase_rate;
+            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
+            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
 
+            error = countError(inputs);
+            FileUtils.addDataset(outputFilePrefix + "_errors", new Dataset(new double[]{i, error}));
             FileUtils.saveNeuronsList(outputFilePrefix + "_it" + i, neurons);
         }
+
 
         savePlotCommand(iterations, outputFilePrefix + "_plot");
         try {
@@ -83,9 +83,41 @@ public class NeuralGasAlgorithm {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        saveErrorPlotCommand(outputFilePrefix + "_error_plot", outputFilePrefix + "_errors");
+        try {
+            Utils.runGnuplotScript(outputFilePrefix + "_error_plot");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         deleteFiles(iterations);
     }
+
+    public void runAlgorithmWithoutGraph(List<Dataset> inputs, int iterations, int howMuchNeurons) {
+
+        START_LAMBDA = howMuchNeurons / 2d;
+
+        this.initializeNeurons(howMuchNeurons, inputs.get(0).size());
+
+        learningRate = START_LEARNING_RATE;
+        lambda = START_LAMBDA;
+        for (int i = 1; i <= iterations; i++) {
+            for (Dataset p : inputs) {
+                process(p);
+            }
+            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
+            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
+
+        }
+    }
+
+    public void runAlgorithmOnImage(String inImage, String outImage, int iterations, int rows, int columns) {
+        List<Dataset> d = ImageUtils.datasetsFromImage(inImage, rows, columns);
+
+        this.runAlgorithmWithoutGraph(d, iterations, rows * columns);
+        ImageUtils.neuronsToImage(this.neurons, d, outImage);
+    }
+
 
     public void deleteFiles(int iterations) {
         File f = new File(outputFilePrefix + "_inputs");
@@ -98,8 +130,27 @@ public class NeuralGasAlgorithm {
         }
         f = new File(outputFilePrefix + "_plot");
         f.delete();
+        f = new File(outputFilePrefix + "_error_plot");
+        f.delete();
+        f = new File(outputFilePrefix + "_errors");
+        f.delete();
     }
 
+    public double countError(List<Dataset> in) {
+        double sum = 0d;
+        for (Dataset d : in) {
+            Neuron winner = findWinner(d);
+            sum = sum + winner.distanceTo(d);
+        }
+        return sum / in.size();
+    }
+
+    private Neuron findWinner(Dataset in) {
+        List<Neuron> tmp2 = new ArrayList<>();
+        tmp2.addAll(neurons);
+        Collections.sort(tmp2, new DatasetDistanceComparator(in));
+        return tmp2.get(0);
+    }
 
     private void process(Dataset in) {
         Collections.sort(neurons, new DatasetDistanceComparator(in));
@@ -118,13 +169,6 @@ public class NeuralGasAlgorithm {
         }
     }
 
-    private void changeLearningSetRate(int iterations) {
-        this.learning_set_decrase_rate = (START_LEARNING_RATE - MIN_LEARNING_RATE) / (double) iterations;
-    }
-
-    private void changeLambdaRate(int iterations) {
-        this.lambda_decrase_rate = (START_LAMBDA - MIN_LAMBDA) / (double) iterations;
-    }
 
     private void savePlotCommand(int iterations, String plotFilePath) {
         try (PrintStream out = new PrintStream(new FileOutputStream(plotFilePath))) {
@@ -149,6 +193,23 @@ public class NeuralGasAlgorithm {
             out.close();
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
+        }
+    }
+
+    private void saveErrorPlotCommand(String plotFilePath, String pointsPathT) {
+        try (PrintStream out = new PrintStream(new FileOutputStream(plotFilePath))) {
+            out.println("set terminal png size 640,480");
+            out.println("set output '" + outputFilePrefix + "_error.png'");
+            out.println("set yrange [0:15]");
+            out.println("set ylabel \'Wartosc bledu\'");
+            out.println("set xlabel \'Epoki\'");
+
+            out.println("set title \"Algorytm gazu neuronowego\"");
+            //out.println("set key outside");
+            out.println("set style data lines");
+            out.println("plot \"" + pointsPathT + "\" title \"Sredni blad kwantyzacji\", \\");
+            out.println();
+        } catch (FileNotFoundException ex) {
         }
     }
 }

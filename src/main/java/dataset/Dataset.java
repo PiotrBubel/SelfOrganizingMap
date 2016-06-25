@@ -13,9 +13,15 @@ public class Dataset {
     public static double MAX_FIRST_VAL = 15d;
 
     protected double[] weights;
+    private int index = -1;
 
     public Dataset(double[] x) {
         this.weights = x;
+    }
+
+    public Dataset(double[] x, int a) {
+        this.weights = x;
+        this.index = a;
     }
 
     public Dataset() {
@@ -28,6 +34,10 @@ public class Dataset {
         for (int i = 0; i < size(); i++) {
             weights[i] = Dataset.MIN_FIRST_VAL + (Dataset.MAX_FIRST_VAL - Dataset.MIN_FIRST_VAL) * r.nextDouble();
         }
+    }
+
+    public int getIndex() {
+        return this.index;
     }
 
     public double[] getWeights() {
