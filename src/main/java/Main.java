@@ -3,6 +3,7 @@ import java.util.List;
 
 import dataset.Dataset;
 import maps.KMeans;
+import maps.Kohonen2DAlgorithm;
 import maps.KohonenAlgorithm;
 import maps.NeuralGasAlgorithm;
 import utils.Utils;
@@ -34,7 +35,7 @@ public class Main {
         //randomized.addAll(Utils.randomizePoints(5, -30, -20, -30, -20));
 
         KMeans kmeans = new KMeans();
-        kmeans.runAlgorithm(randomized, 40, 9);
+        //kmeans.runAlgorithm(randomized, 40, 9);
 
 
         NeuralGasAlgorithm.MIN_LAMBDA = 0.01;
@@ -44,7 +45,7 @@ public class Main {
         NeuralGasAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
 
         NeuralGasAlgorithm ngas = new NeuralGasAlgorithm();
-        ngas.runAlgorithm(randomized, 120, 150);
+        //ngas.runAlgorithm(randomized, 120, 150);
         //wzorce, epoki, neurony
 
 
@@ -55,11 +56,24 @@ public class Main {
         KohonenAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
 
         KohonenAlgorithm kohonen = new KohonenAlgorithm();
-        kohonen.runAlgorithm(randomized, 120, 150);
+        //kohonen.runAlgorithm(randomized, 120, 150);
 
         KohonenAlgorithm kohonen1 = new KohonenAlgorithm();
-        kohonen1.runTwoPhaseAlgorithm(randomized, 80, 150);
+        //kohonen1.runTwoPhaseAlgorithm(randomized, 80, 150);
 
+
+
+        Kohonen2DAlgorithm.MIN_LAMBDA = 0.001;
+        Kohonen2DAlgorithm.START_LEARNING_RATE = 0.05d;
+        Kohonen2DAlgorithm.MIN_LEARNING_RATE = 0.005d;
+        Kohonen2DAlgorithm.ENABLE_NEURON_POTENTIAL = false;
+        Kohonen2DAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
+
+        Kohonen2DAlgorithm kohonen2d = new Kohonen2DAlgorithm();
+        kohonen2d.runAlgorithm(randomized, 120, 15, 15);
+
+        Kohonen2DAlgorithm kohonen2d2 = new Kohonen2DAlgorithm();
+        kohonen2d2.runTwoPhaseAlgorithm(randomized, 80, 15, 15);
 /*
         String fileName = "image2.jpg";
 
