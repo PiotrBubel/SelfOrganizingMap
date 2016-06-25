@@ -6,6 +6,7 @@ import maps.KMeans;
 import maps.Kohonen2DAlgorithm;
 import maps.KohonenAlgorithm;
 import maps.NeuralGasAlgorithm;
+import utils.ImageUtils;
 import utils.Utils;
 
 /**
@@ -72,7 +73,12 @@ public class Main {
         }
 
         if (obrazki) {
-            String inImage = "photo.jpg";
+            ImageUtils.test();
+
+            String inImage = "image.jpg";
+            int x = 20;
+            int y = x;
+            int epochs = 2000;
 
             KohonenAlgorithm.MIN_LAMBDA = 0.01;
             KohonenAlgorithm.START_LEARNING_RATE = 0.5d;
@@ -80,7 +86,7 @@ public class Main {
             KohonenAlgorithm.ENABLE_NEURON_POTENTIAL = false;
             KohonenAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
             KohonenAlgorithm koh = new KohonenAlgorithm();
-            koh.runAlgorithmOnImage("image.jpg", "_gas_chunks1_koh.png", 2000, 10, 10);
+            koh.runAlgorithmOnImage(inImage, "_koh_chunks.png", epochs, x, y);
             System.out.println("koh");
 
 
@@ -90,7 +96,7 @@ public class Main {
             NeuralGasAlgorithm.ENABLE_NEURON_POTENTIAL = false;
             NeuralGasAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
             NeuralGasAlgorithm gas = new NeuralGasAlgorithm();
-            //gas.runAlgorithmOnImage("image.jpg", "_gas_chunks1.png", 2000, 10, 10);
+            gas.runAlgorithmOnImage(inImage, "_gas_chunks.png", epochs, x, y);
             //gas.runAlgorithmOnImage("image2.jpg", "_gas_chunks2.png", 2000, 5, 5);
 
             System.out.println("gas");
@@ -102,7 +108,7 @@ public class Main {
             Kohonen2DAlgorithm.ENABLE_NEURON_POTENTIAL = false;
             Kohonen2DAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
             Kohonen2DAlgorithm koh2d = new Kohonen2DAlgorithm();
-            //koh2d.runAlgorithmOnImage(inImage, "_koh2d_p.png", 500, 48, 48);
+            koh2d.runAlgorithmOnImage(inImage, "_koh2d_chunks.png", epochs, x, y);
             System.out.println("koh2");
 
         }

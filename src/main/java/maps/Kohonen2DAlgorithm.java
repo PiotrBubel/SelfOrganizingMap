@@ -13,6 +13,7 @@ import dataset.Dataset;
 import dataset.DatasetDistanceComparator;
 import dataset.Neuron;
 import utils.FileUtils;
+import utils.ImageUtils;
 import utils.Utils;
 
 /**
@@ -237,6 +238,12 @@ public class Kohonen2DAlgorithm {
         }
     }
 
+    public void runAlgorithmOnImage(String inImage, String outImage, int iterations, int rows, int columns) {
+        List<Dataset> d = ImageUtils.datasetsFromImage(inImage, rows, columns);
+
+        this.runAlgorithmWithoutGraph(d, iterations, rows, columns);
+        ImageUtils.neuronsToImage(this.getNeuronsList(), d, outImage);
+    }
 /*
     public void runAlgorithmOnImage(String inImage, String outImage, int iterations, int x, int y) {
         BufferedImage imageLoaded = ImageUtils.loadImage(inImage);

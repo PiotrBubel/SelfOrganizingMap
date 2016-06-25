@@ -24,8 +24,20 @@ public class ImageUtils {
     public static int chunkHeight = -1;
     public static int rows = -1;
     public static int cols = -1;
-    //public static int imageWidth = -1;
-    //public static int imageHeight = -1;
+    public static int imageType = BufferedImage.TYPE_BYTE_GRAY;
+
+
+    public static void test() {
+        BufferedImage image;
+
+        List<Dataset> datasets = datasetsFromImage("photo.png", 6, 6);
+        BufferedImage[] tab = new BufferedImage[datasets.size()];
+        for (int i = 0; i < datasets.size(); i++) {
+            tab[i] = ImageUtils.neuronToImage(datasets.get(i).toNeuron());
+        }
+        image = mergeImages(tab);
+        saveImage("test.png", image);
+    }
 
     private static BufferedImage[] splitImage(BufferedImage image, int rows, int cols) {
         int chunks = rows * cols;
@@ -44,23 +56,12 @@ public class ImageUtils {
                 gr.dispose();
             }
         }
-        System.out.println("Splitting done");
 
         return imgs;
     }
 
     private static BufferedImage mergeImages(BufferedImage[] buffImages) {
-        //BufferedImage[] buffImages = new BufferedImage[chunks];
-        int chunks = buffImages.length;
-
-        //chunkWidth = buffImages[0].getWidth();
-        //chunkHeight = buffImages[0].getHeight();
-
-        //Initializing the final image
-        System.out.println(chunkWidth * cols);
-        System.out.println(chunkHeight * rows);
-
-        BufferedImage finalImg = new BufferedImage(chunkWidth * cols, chunkHeight * rows, BufferedImage.TYPE_BYTE_GRAY);
+        BufferedImage finalImg = new BufferedImage(chunkWidth * cols, chunkHeight * rows, imageType);
 
         int num = 0;
         for (int i = 0; i < rows; i++) {
@@ -69,7 +70,6 @@ public class ImageUtils {
                 num++;
             }
         }
-        System.out.println("Image concatenated.....");
         return finalImg;
     }
 
@@ -81,7 +81,7 @@ public class ImageUtils {
             System.out.println("Wrong chunks dimensions");
             return null;
         }
-//FIXME
+
         double[] result = new double[width * height];
         int n = 0;
         for (int row = 0; row < height; row++) {
@@ -118,7 +118,6 @@ public class ImageUtils {
 
     private static BufferedImage neuronToImage(Neuron neuron) {
         double[] weights = neuron.getWeights();
-        //int[][] imageArray = new int[chunkHeight][chunkWidth];
         int[][] imageArray = new int[chunkHeight][chunkWidth];
 
         for (int x = 0; x < chunkHeight; x++) {
@@ -126,13 +125,14 @@ public class ImageUtils {
                 imageArray[x][k] = (int) weights[chunkHeight * x + k];
             }
         }
-        BufferedImage bufferedImage = new BufferedImage(chunkWidth * cols, chunkHeight * rows, BufferedImage.TYPE_BYTE_GRAY);
+        BufferedImage bufferedImage = new BufferedImage(chunkWidth * cols, chunkHeight * rows, imageType);
         for (int i = 0; i < imageArray.length; i++) {
             for (int j = 0; j < imageArray[0].length; j++) {
                 int pixel = imageArray[i][j];
-                System.out.println("The pixel in Matrix: " + pixel);
-                bufferedImage.setRGB(i, j, pixel);
-                System.out.println("The pixel in BufferedImage: " + bufferedImage.getRGB(i, j));
+                bufferedImage.setRGB(j, i, pixel);
+                //if (pixel != bufferedImage.getRGB(i, j)) {
+                //    System.out.println("nie dziala, pixel: " + pixel + " image: " + bufferedImage.getRGB(i, j));
+                //}
             }
         }
 
@@ -140,21 +140,21 @@ public class ImageUtils {
     }
 
 
-    public static BufferedImage neuronsToImageWoronoi(List<Neuron> neurons, int width, int height) {
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
+    public static BufferedImage neuronsToImageWoronoi(List<Neuron> neurons, int[] colors, int width, int height) {
+        BufferedImage image = new BufferedImage(width, height, imageType);
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 double minDistance = Double.MAX_VALUE;
-                double winnerRGB = 0;
-                for (Neuron n : neurons) {
-                    double[] weights = n.getWeights();
+                int winnerRGB = 0;
+                for (int n = 0; n < neurons.size(); n++) {
+                    double[] weights = neurons.get(n).getWeights();
                     double distance = distance((int) weights[0], (int) weights[1], i, j);
                     if (distance < minDistance) {
-                        winnerRGB = weights[2];
+                        winnerRGB = colors[n];
                         minDistance = distance;
                     }
                 }
-                image.setRGB(i, j, (int) winnerRGB);
+                image.setRGB(i, j, winnerRGB);
             }
         }
         return image;

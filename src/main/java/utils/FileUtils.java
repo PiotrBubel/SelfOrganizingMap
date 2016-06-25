@@ -4,6 +4,7 @@ package utils;
  * Created by Piotrek on 17.06.2016.
  */
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
