@@ -11,7 +11,9 @@ import java.util.Random;
 
 import dataset.ClusteredDataset;
 import dataset.Dataset;
+import dataset.Neuron;
 import utils.FileUtils;
+import utils.ImageUtils;
 import utils.Utils;
 
 /**
@@ -90,6 +92,9 @@ public class KMeans {
         double lastError = Double.MAX_VALUE;
         int realIterations = 0;
 
+        //File f = new File(outputFilePrefix + "_errors");
+        //f.delete();
+
         for (int it = 0; it < iterations; it++) {
             //przypisujemy punkty do srodkow skupien na podstawie odleglosci
             for (ClusteredDataset p : input) {
@@ -108,10 +113,11 @@ public class KMeans {
                 list.add(p);
             }
             FileUtils.saveDatasetList("_centroids" + it, list);
+
             double currentError = countError(input, groups);
-            //System.out.println("ended " + it + "iteration");
-            //System.out.println("with error: " + currentError);
-            //System.out.println();
+            //System.out.println(currentError);
+            //FileUtils.addDataset(outputFilePrefix + "_errors", new Dataset(new double[]{it, currentError}));
+
             realIterations++;
             if (currentError == lastError) {
                 System.out.println("error does not changed, algorithm ended");
@@ -124,15 +130,56 @@ public class KMeans {
 
         String plotFile = "_KMeans_plot";
         savePlotCommand(groups, realIterations, plotFile);
-
         try {
             Utils.runGnuplotScript(plotFile);
         } catch (IOException e) {
             System.out.println("Blad podczas rysowania animacji k-srednich");
         }
 
+        //saveErrorPlotCommand(outputFilePrefix + "_error_plot", outputFilePrefix + "_errors");
+        //try {
+        //    Utils.runGnuplotScript(outputFilePrefix + "_error_plot");
+        //} catch (IOException e) {
+        //    e.printStackTrace();
+        //}
+
         deleteFiles(iterations, groups);
 
+        return input;
+    }
+
+    private List<ClusteredDataset> groupClusteredWithoutGraph(List<ClusteredDataset> input, int groups, int iterations) {
+        this.groupCenters = randomizeCentroidsFromInputs(groups, input);
+        double lastError = Double.MAX_VALUE;
+
+        for (int it = 0; it < iterations; it++) {
+            //przypisujemy punkty do srodkow skupien na podstawie odleglosci
+            for (ClusteredDataset p : input) {
+                p.setGroup(belongsTo(p));
+            }
+            //ustalamy nowe srodki skupien (srednia wspolrzednych)
+            List<List<ClusteredDataset>> lists = Utils.splitClusteredPoints2(input);
+            for (int i = 0; i < groupCenters.length; i++) {
+                //groupCenters[i] = findNewCentroid2(lists.get(i), i);
+                groupCenters[i] = findNewCentroid(input, i);
+            }
+
+            List<Dataset> list = new ArrayList<>();
+            for (ClusteredDataset p : groupCenters) {
+                list.add(p);
+            }
+
+            double currentError = countError(input, groups);
+            //System.out.println(currentError);
+            //FileUtils.addDataset(outputFilePrefix + "_errors", new Dataset(new double[]{it, currentError}));
+            if (currentError == lastError) {
+                System.out.println("error does not changed, algorithm ended");
+                System.out.println("with error: " + currentError);
+                break;
+            } else {
+                lastError = currentError;
+            }
+        }
         return input;
     }
 
@@ -186,6 +233,25 @@ public class KMeans {
         return groupClustered(clustered, groups, iterations);
     }
 
+
+    public void runAlgorithmOnImage(String inImage, String outImage, int iterations, int rows, int columns) {
+        List<Dataset> d = ImageUtils.datasetsFromImage(inImage, rows, columns);
+
+        List<ClusteredDataset> clustered = new ArrayList<>();
+        for (Dataset p : d) {
+            clustered.add(new ClusteredDataset(p.getWeights(), 0));
+        }
+
+        this.groupClusteredWithoutGraph(clustered, rows * columns, iterations);
+
+        List<Neuron> neurons = new ArrayList<>();
+        for (int i = 0; i < groupCenters.length; i++) {
+            neurons.add(new Neuron(groupCenters[i].getWeights()));
+        }
+        ImageUtils.neuronsToImage(neurons, d, outImage);
+
+    }
+
     private void savePlotCommand(int groups, int iterations, String plotFilePath) {
         try (PrintStream out = new PrintStream(new FileOutputStream(plotFilePath))) {
             out.println("set terminal gif animate delay 20");
@@ -220,6 +286,24 @@ public class KMeans {
             out.close();
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
+        }
+    }
+
+    private void saveErrorPlotCommand(String plotFilePath, String pointsPathT) {
+
+        try (PrintStream out = new PrintStream(new FileOutputStream(plotFilePath))) {
+            out.println("set terminal png size 640,480");
+            out.println("set yrange [0:15]");
+            out.println("set ylabel \'Wartosc bledu\'");
+            out.println("set xlabel \'Epoki\'");
+
+            out.println("set output '" + outputFilePrefix + "_error.png'");
+            out.println("set title \"Algorytm k-srednich\"");
+            //out.println("set key outside");
+            out.println("set style data lines");
+            out.println("plot \"" + pointsPathT + "\" title \"Sredni blad kwantyzacji\", \\");
+            out.println();
+        } catch (FileNotFoundException ex) {
         }
     }
 }

@@ -1,6 +1,8 @@
-package dataset;
+package dataset.comparators;
 
 import java.util.Comparator;
+
+import dataset.Dataset;
 
 /**
  * Created by Piotrek on 22.06.2016.
