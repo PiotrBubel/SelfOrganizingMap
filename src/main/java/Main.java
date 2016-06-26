@@ -27,7 +27,7 @@ public class Main {
         randomized.addAll(Utils.randomizePoints(100, 2 * min + 10, 2 * max + 10, 2 * min + 10, 2 * max + 10));
         randomized.addAll(Utils.randomizePoints(100, 2 * min - 10, 2 * max + 10, 2 * min - 10, 2 * max + 10));
 
-        boolean grafy = true;
+        boolean grafy = false;
         boolean obrazki = true;
 
         if (grafy) {
@@ -73,13 +73,13 @@ public class Main {
         }
 
         if (obrazki) {
-            ImageUtils.test();
+            //ImageUtils.test();
 
 
-            String inImage = "image.jpg";
-            int x = 10;
+            String inImage = "image.png";
+            int x = 20;
             int y = x;
-            int epochs = 2000;
+            int epochs = 1000;
 
             KMeans kmeans = new KMeans();
             //kmeans.runAlgorithmOnImage(inImage, "_kmeans_chunks.png", epochs, x, y);
@@ -91,18 +91,17 @@ public class Main {
             KohonenAlgorithm.ENABLE_NEURON_POTENTIAL = false;
             KohonenAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
             KohonenAlgorithm koh = new KohonenAlgorithm();
-            koh.runAlgorithmOnImage(inImage, "_koh_chunks.png", epochs, x, y);
+            koh.runAlgorithmOnImage(inImage, "_koh_chunks_11i.png", epochs, x, y);
             System.out.println("koh");
 
 
             NeuralGasAlgorithm.MIN_LAMBDA = 0.01;
-            NeuralGasAlgorithm.START_LEARNING_RATE = 0.08d;
+            NeuralGasAlgorithm.START_LEARNING_RATE = 0.8d;
             NeuralGasAlgorithm.MIN_LEARNING_RATE = 0.03d;
             NeuralGasAlgorithm.ENABLE_NEURON_POTENTIAL = false;
             NeuralGasAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
             NeuralGasAlgorithm gas = new NeuralGasAlgorithm();
-            gas.runAlgorithmOnImage(inImage, "_gas_chunks.png", epochs, x, y);
-
+            gas.runAlgorithmOnImage(inImage, "_gas_chunks_11i.png", epochs, x, y);
             System.out.println("gas");
 
 
@@ -112,7 +111,7 @@ public class Main {
             Kohonen2DAlgorithm.ENABLE_NEURON_POTENTIAL = false;
             Kohonen2DAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
             Kohonen2DAlgorithm koh2d = new Kohonen2DAlgorithm();
-            koh2d.runAlgorithmOnImage(inImage, "_koh2d_chunks.png", epochs, x, y);
+            koh2d.runAlgorithmOnImage(inImage, "_koh2d_chunks_11i.png", epochs, x, y);
             System.out.println("koh2");
 
         }
