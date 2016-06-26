@@ -118,7 +118,7 @@ public class ImageUtils {
         for (int i = 0; i < input.size(); i++) {
             Neuron winner = ImageUtils.findWinner(input.get(i), neurons);
             splitted[i] = ImageUtils.neuronToImage(winner);
-            System.gc(); //FIXME
+            System.gc(); //FIXME ??
         }
 
         ImageUtils.saveImage(outImage, ImageUtils.mergeImages(splitted));
@@ -128,12 +128,6 @@ public class ImageUtils {
         double[] weights = neuron.getWeights();
         int[][] imageArray = new int[chunkHeight][chunkWidth];
 
-        //System.out.println(chunkHeight);
-        //System.out.println(chunkWidth);
-        //System.out.println((chunkHeight - 1) * (chunkWidth - 1) + (chunkWidth - 1));
-        //System.out.println(chunkHeight * chunkWidth);
-        //System.out.println(weights.length);
-        //System.out.println("-------------------");
         int neu = 0;
         for (int x = 0; x < chunkHeight; x++) {
             for (int k = 0; k < chunkWidth; k++) {
@@ -141,15 +135,13 @@ public class ImageUtils {
                 neu++;
             }
         }
-        BufferedImage bufferedImage = new BufferedImage(chunkWidth * cols, chunkHeight * rows, imageType);
+
+        BufferedImage bufferedImage = new BufferedImage(chunkWidth, chunkHeight, imageType);
         for (int i = 0; i < imageArray.length; i++) {
             for (int j = 0; j < imageArray[0].length; j++) {
                 int pixel = imageArray[i][j];
                 int gray = (pixel << 16) + (pixel << 8) + pixel;
                 bufferedImage.setRGB(j, i, gray);
-                //if (pixel != bufferedImage.getRGB(i, j)) {
-                //    System.out.println("nie dziala, pixel: " + pixel + " image: " + bufferedImage.getRGB(i, j));
-                //}
             }
         }
 

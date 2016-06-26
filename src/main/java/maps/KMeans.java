@@ -181,7 +181,7 @@ public class KMeans {
             }
 
             if (it % 10 == 0) {
-                System.out.println("k-means iteration: " + ti);
+                System.out.println("k-means iteration: " + it);
             }
         }
         return input;
