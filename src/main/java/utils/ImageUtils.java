@@ -12,9 +12,9 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 
 import dataset.Dataset;
+import dataset.Neuron;
 import dataset.comparators.DatasetDistanceComparator;
 import dataset.comparators.DatasetIndexComparator;
-import dataset.Neuron;
 
 /**
  * Created by Piotrek on 25.06.2016.
@@ -31,13 +31,13 @@ public class ImageUtils {
     public static void test() {
         BufferedImage image;
 
-        List<Dataset> datasets = datasetsFromImage("photo.png", 6, 6);
+        List<Dataset> datasets = datasetsFromImage("image.png", 5, 5);
         BufferedImage[] tab = new BufferedImage[datasets.size()];
         for (int i = 0; i < datasets.size(); i++) {
             tab[i] = ImageUtils.neuronToImage(datasets.get(i).toNeuron());
         }
         image = mergeImages(tab);
-        saveImage("test.png", image);
+        saveImage("image.png", image);
     }
 
     private static BufferedImage[] splitImage(BufferedImage image, int rows, int cols) {
@@ -121,9 +121,17 @@ public class ImageUtils {
         double[] weights = neuron.getWeights();
         int[][] imageArray = new int[chunkHeight][chunkWidth];
 
+        //System.out.println(chunkHeight);
+        //System.out.println(chunkWidth);
+        //System.out.println((chunkHeight - 1) * (chunkWidth - 1) + (chunkWidth - 1));
+        //System.out.println(chunkHeight * chunkWidth);
+        //System.out.println(weights.length);
+        //System.out.println("-------------------");
+        int neu = 0;
         for (int x = 0; x < chunkHeight; x++) {
             for (int k = 0; k < chunkWidth; k++) {
-                imageArray[x][k] = (int) weights[chunkHeight * x + k];
+                imageArray[x][k] = (int) weights[neu];//[chunkHeight * x + k];
+                neu++;
             }
         }
         BufferedImage bufferedImage = new BufferedImage(chunkWidth * cols, chunkHeight * rows, imageType);
@@ -187,6 +195,7 @@ public class ImageUtils {
         BufferedImage image = null;
         try {
             image = ImageIO.read(new File(fileName));
+            imageType = image.getType();
         } catch (IOException e) {
             e.printStackTrace();
         }
