@@ -91,7 +91,7 @@ public class Main {
             KohonenAlgorithm.ENABLE_NEURON_POTENTIAL = false;
             KohonenAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
             KohonenAlgorithm koh = new KohonenAlgorithm();
-            koh.runAlgorithmOnImage(inImage, "_koh_chunks_11i.png", epochs, x, y);
+            koh.runAlgorithmOnImage(inImage, "_koh_1.png", epochs, x, y);
             System.out.println("koh");
 
 
@@ -101,7 +101,7 @@ public class Main {
             NeuralGasAlgorithm.ENABLE_NEURON_POTENTIAL = false;
             NeuralGasAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
             NeuralGasAlgorithm gas = new NeuralGasAlgorithm();
-            gas.runAlgorithmOnImage(inImage, "_gas_chunks_11i.png", epochs, x, y);
+            gas.runAlgorithmOnImage(inImage, "_gas_1.png", epochs, x, y);
             System.out.println("gas");
 
 
@@ -111,7 +111,7 @@ public class Main {
             Kohonen2DAlgorithm.ENABLE_NEURON_POTENTIAL = false;
             Kohonen2DAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
             Kohonen2DAlgorithm koh2d = new Kohonen2DAlgorithm();
-            koh2d.runAlgorithmOnImage(inImage, "_koh2d_chunks_11i.png", epochs, x, y);
+            koh2d.runAlgorithmOnImage(inImage, "_koh2d_1.png", epochs, x, y);
             System.out.println("koh2");
 
         }

@@ -10,8 +10,8 @@ import java.util.Collections;
 import java.util.List;
 
 import dataset.Dataset;
-import dataset.comparators.DatasetDistanceComparator;
 import dataset.Neuron;
+import dataset.comparators.DatasetDistanceComparator;
 import utils.FileUtils;
 import utils.ImageUtils;
 import utils.Utils;
@@ -42,6 +42,11 @@ public class Kohonen2DAlgorithm {
         this.neurons = null;
     }
 
+    private void changeParameters(int i, int iterations) {
+        learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
+        lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
+    }
+
     public Neuron[][] getNeurons() {
         return neurons;
     }
@@ -61,7 +66,14 @@ public class Kohonen2DAlgorithm {
         this.outputFilePrefix = i;
     }
 
-    private void initializeNeurons(int x, int y, int dimentions) {
+    private void initializeNeurons(int x, int y, int dimentions, List<Dataset> input) {
+        double[] mm = Utils.findMaxMin(input);
+        double max = mm[0];
+        double min = mm[1];
+        double span = max - min;
+        Dataset.MAX_FIRST_VAL = min + span * 0.25;
+        Dataset.MIN_FIRST_VAL = min + span * 0.75;
+
         this.neurons = new Neuron[x][y];
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
@@ -70,11 +82,12 @@ public class Kohonen2DAlgorithm {
         }
     }
 
+
     public void runAlgorithm(List<Dataset> inputs, int iterations, int x, int y) {
 
         START_LAMBDA = ((double) (x * y)) / 2d;
 
-        this.initializeNeurons(x, y, inputs.get(0).size());
+        this.initializeNeurons(x, y, inputs.get(0).size(), inputs);
 
         FileUtils.saveDatasetList(outputFilePrefix + "_inputs", inputs);
         FileUtils.saveNeuronsArray(outputFilePrefix + "_it" + 0, neurons);
@@ -88,9 +101,7 @@ public class Kohonen2DAlgorithm {
             for (Dataset p : inputs) {
                 process(p);
             }
-            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
-            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
-
+            changeParameters(i, iterations);
             FileUtils.saveNeuronsArray(outputFilePrefix + "_it" + i, neurons);
             error = countError(inputs);
             FileUtils.addDataset(outputFilePrefix + "_errors", new Dataset(new double[]{i, error}));
@@ -118,7 +129,7 @@ public class Kohonen2DAlgorithm {
 
         START_LAMBDA = ((double) (x * y)) / 2d;
 
-        this.initializeNeurons(x, y, inputs.get(0).size());
+        this.initializeNeurons(x, y, inputs.get(0).size(), inputs);
 
         learningRate = START_LEARNING_RATE;
         lambda = START_LAMBDA;
@@ -127,9 +138,7 @@ public class Kohonen2DAlgorithm {
             for (Dataset p : inputs) {
                 process(p);
             }
-            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
-            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
-
+            changeParameters(i, iterations);
         }
     }
 
@@ -137,7 +146,7 @@ public class Kohonen2DAlgorithm {
 
         START_LAMBDA = ((double) (x * y)) / 2d;
 
-        this.initializeNeurons(x, y, inputs.get(0).size());
+        this.initializeNeurons(x, y, inputs.get(0).size(), inputs);
 
         String tmpFile = this.outputFilePrefix;
 
@@ -159,9 +168,7 @@ public class Kohonen2DAlgorithm {
             for (Dataset p : inputs) {
                 process(p);
             }
-            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
-            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
-
+            changeParameters(i, iterations);
             FileUtils.saveNeuronsArray(outputFilePrefix + "_it" + i, neurons);
             error = countError(inputs);
             FileUtils.addDataset(outputFilePrefix + "_errors", new Dataset(new double[]{i, error}));
@@ -175,9 +182,7 @@ public class Kohonen2DAlgorithm {
             for (Dataset p : inputs) {
                 process(p);
             }
-            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
-            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
-
+            //changeParameters(i, iterations);
             FileUtils.saveNeuronsArray(outputFilePrefix + "_it" + i, neurons);
             error = countError(inputs);
             FileUtils.addDataset(outputFilePrefix + "_errors", new Dataset(new double[]{i, error}));
@@ -206,7 +211,7 @@ public class Kohonen2DAlgorithm {
 
         START_LAMBDA = ((double) (x * y)) / 2d;
 
-        this.initializeNeurons(x, y, inputs.get(0).size());
+        this.initializeNeurons(x, y, inputs.get(0).size(), inputs);
 
         int it1 = iterations + (iterations / 2);
 
@@ -220,9 +225,7 @@ public class Kohonen2DAlgorithm {
             for (Dataset p : inputs) {
                 process(p);
             }
-            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
-            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
-
+            changeParameters(i, iterations);
         }
 
         //FAZA 2
@@ -232,9 +235,7 @@ public class Kohonen2DAlgorithm {
             for (Dataset p : inputs) {
                 process(p);
             }
-            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
-            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
-
+            //changeParameters(i, iterations);
         }
     }
 

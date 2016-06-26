@@ -10,8 +10,8 @@ import java.util.Collections;
 import java.util.List;
 
 import dataset.Dataset;
-import dataset.comparators.DatasetDistanceComparator;
 import dataset.Neuron;
+import dataset.comparators.DatasetDistanceComparator;
 import utils.FileUtils;
 import utils.ImageUtils;
 import utils.Utils;
@@ -49,18 +49,29 @@ public class KohonenAlgorithm {
         this.outputFilePrefix = i;
     }
 
-    private void initializeNeurons(int howMuch, int dimentions) {
+    private void initializeNeurons(int howMuch, int dimentions, List<Dataset> input) {
         this.neurons = new ArrayList<>();
+        double[] mm = Utils.findMaxMin(input);
+        double max = mm[0];
+        double min = mm[1];
+        double span = max - min;
+        Dataset.MAX_FIRST_VAL = min + span * 0.25;
+        Dataset.MIN_FIRST_VAL = min + span * 0.75;
         for (int i = 0; i < howMuch; i++) {
             this.neurons.add(new Neuron(dimentions));
         }
+    }
+
+    private void changeParameters(int i, int iterations) {
+        learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
+        lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
     }
 
     public void runAlgorithm(List<Dataset> inputs, int iterations, int howMuchNeurons) {
 
         START_LAMBDA = howMuchNeurons / 2d;
 
-        this.initializeNeurons(howMuchNeurons, inputs.get(0).size());
+        this.initializeNeurons(howMuchNeurons, inputs.get(0).size(), inputs);
 
         File f = new File(outputFilePrefix + "_errors");
         f.delete();
@@ -74,9 +85,7 @@ public class KohonenAlgorithm {
             for (Dataset p : inputs) {
                 process(p);
             }
-            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
-            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
-
+            changeParameters(i, iterations);
             FileUtils.saveNeuronsList(outputFilePrefix + "_it" + i, neurons);
             error = countError(inputs);
             FileUtils.addDataset(outputFilePrefix + "_errors", new Dataset(new double[]{i, error}));
@@ -108,7 +117,7 @@ public class KohonenAlgorithm {
         File f = new File(outputFilePrefix + "_errors");
         f.delete();
         int it1 = iterations + (iterations / 2) + 100;
-        this.initializeNeurons(howMuchNeurons, inputs.get(0).size());
+        this.initializeNeurons(howMuchNeurons, inputs.get(0).size(), inputs);
 
 
         //FAZA 1
@@ -123,9 +132,7 @@ public class KohonenAlgorithm {
             for (Dataset p : inputs) {
                 process(p);
             }
-            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
-            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
-
+            changeParameters(i, iterations);
             FileUtils.saveNeuronsList(outputFilePrefix + "_it" + i, neurons);
             error = countError(inputs);
             FileUtils.addDataset(outputFilePrefix + "_errors", new Dataset(new double[]{i, error}));
@@ -138,9 +145,7 @@ public class KohonenAlgorithm {
             for (Dataset p : inputs) {
                 process(p);
             }
-            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
-            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
-
+            //changeParameters(i, iterations);
             FileUtils.saveNeuronsList(outputFilePrefix + "_it" + i, neurons);
             error = countError(inputs);
             FileUtils.addDataset(outputFilePrefix + "_errors", new Dataset(new double[]{i, error}));
@@ -169,7 +174,7 @@ public class KohonenAlgorithm {
 
         START_LAMBDA = howMuchNeurons / 2d;
 
-        this.initializeNeurons(howMuchNeurons, inputs.get(0).size());
+        this.initializeNeurons(howMuchNeurons, inputs.get(0).size(), inputs);
 
         learningRate = START_LEARNING_RATE;
         lambda = START_LAMBDA;
@@ -178,9 +183,7 @@ public class KohonenAlgorithm {
             for (Dataset p : inputs) {
                 process(p);
             }
-            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
-            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
-
+            changeParameters(i, iterations);
         }
     }
 
@@ -188,7 +191,7 @@ public class KohonenAlgorithm {
 
         START_LAMBDA = howMuchNeurons / 2d;
         int it1 = iterations + (iterations / 2);
-        this.initializeNeurons(howMuchNeurons, inputs.get(0).size());
+        this.initializeNeurons(howMuchNeurons, inputs.get(0).size(), inputs);
 
         //FAZA 1
         KohonenAlgorithm.WINNER_TAKES_ALL = false;
@@ -198,8 +201,7 @@ public class KohonenAlgorithm {
             for (Dataset p : inputs) {
                 process(p);
             }
-            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
-            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
+            changeParameters(i, iterations);
         }
 
         //FAZA 2
@@ -209,9 +211,7 @@ public class KohonenAlgorithm {
             for (Dataset p : inputs) {
                 process(p);
             }
-            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) it1);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
-            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) it1);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
-
+            //changeParameters(i, iterations);
         }
     }
 

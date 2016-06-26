@@ -65,6 +65,24 @@ public class Utils {
         return splitted;
     }
 
+    /**
+     * @return double[] {max, min}
+     */
+    public static double[] findMaxMin(List<Dataset> list) {
+        double max = Double.MIN_VALUE; //max
+        double min = Double.MAX_VALUE; //min
+        for (Dataset d : list) {
+            for (double v : d.getWeights()) {
+                if (v > max) {
+                    max = v;
+                } else if (v < min) {
+                    min = v;
+                }
+            }
+        }
+        return new double[]{max, min};
+    }
+
 
     public static void runGnuplotScript(String scriptName) throws IOException {
         Process gnuplot;

@@ -10,8 +10,8 @@ import java.util.Collections;
 import java.util.List;
 
 import dataset.Dataset;
-import dataset.comparators.DatasetDistanceComparator;
 import dataset.Neuron;
+import dataset.comparators.DatasetDistanceComparator;
 import utils.FileUtils;
 import utils.ImageUtils;
 import utils.Utils;
@@ -43,8 +43,14 @@ public class NeuralGasAlgorithm {
         return neurons;
     }
 
-    private void initializeNeurons(int howMuch, int dimentions) {
+    private void initializeNeurons(int howMuch, int dimentions, List<Dataset> input) {
         this.neurons = new ArrayList<>();
+        double[] mm = Utils.findMaxMin(input);
+        double max = mm[0];
+        double min = mm[1];
+        double span = max - min;
+        Dataset.MAX_FIRST_VAL = min + span * 0.25;
+        Dataset.MIN_FIRST_VAL = min + span * 0.75;
         for (int i = 0; i < howMuch; i++) {
             this.neurons.add(new Neuron(dimentions));
         }
@@ -54,7 +60,7 @@ public class NeuralGasAlgorithm {
 
         START_LAMBDA = howMuchNeurons / 2d;
 
-        this.initializeNeurons(howMuchNeurons, inputs.get(0).size());
+        this.initializeNeurons(howMuchNeurons, inputs.get(0).size(), inputs);
         File f = new File(outputFilePrefix + "_errors");
         f.delete();
 
@@ -68,9 +74,7 @@ public class NeuralGasAlgorithm {
             for (Dataset p : inputs) {
                 process(p);
             }
-            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
-            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
-
+            changeParameters(i, iterations);
             error = countError(inputs);
             FileUtils.addDataset(outputFilePrefix + "_errors", new Dataset(new double[]{i, error}));
             FileUtils.saveNeuronsList(outputFilePrefix + "_it" + i, neurons);
@@ -95,11 +99,16 @@ public class NeuralGasAlgorithm {
         deleteFiles(iterations);
     }
 
+    private void changeParameters(int i, int iterations) {
+        learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
+        lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
+    }
+
     public void runAlgorithmWithoutGraph(List<Dataset> inputs, int iterations, int howMuchNeurons) {
 
         START_LAMBDA = howMuchNeurons / 2d;
 
-        this.initializeNeurons(howMuchNeurons, inputs.get(0).size());
+        this.initializeNeurons(howMuchNeurons, inputs.get(0).size(), inputs);
 
         learningRate = START_LEARNING_RATE;
         lambda = START_LAMBDA;
@@ -107,9 +116,7 @@ public class NeuralGasAlgorithm {
             for (Dataset p : inputs) {
                 process(p);
             }
-            learningRate = START_LEARNING_RATE * Math.pow(MIN_LEARNING_RATE / START_LEARNING_RATE, (double) i / (double) iterations);//START_LEARNING_RATE * Math.exp(-0.1d * (double) i);//learningRate - learning_set_decrase_rate;
-            lambda = START_LAMBDA * Math.pow(MIN_LAMBDA / START_LAMBDA, (double) i / (double) iterations);//START_LAMBDA * Math.exp(-0.1d * (double) i);//lambda - lambda_decrase_rate;
-
+            changeParameters(i, iterations);
         }
     }
 
@@ -119,7 +126,6 @@ public class NeuralGasAlgorithm {
         this.runAlgorithmWithoutGraph(d, iterations, rows * columns);
         ImageUtils.neuronsToImage(this.neurons, d, outImage);
     }
-
 
     public void deleteFiles(int iterations) {
         File f = new File(outputFilePrefix + "_inputs");
@@ -170,7 +176,6 @@ public class NeuralGasAlgorithm {
             }
         }
     }
-
 
     private void savePlotCommand(int iterations, String plotFilePath) {
         try (PrintStream out = new PrintStream(new FileOutputStream(plotFilePath))) {
