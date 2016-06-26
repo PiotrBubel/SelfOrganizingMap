@@ -138,6 +138,9 @@ public class Kohonen2DAlgorithm {
             for (Dataset p : inputs) {
                 process(p);
             }
+            if (i % 10 == 0) {
+                System.out.println("kohonen 2d iteration: " + i);
+            }
             changeParameters(i, iterations);
         }
     }
@@ -239,17 +242,17 @@ public class Kohonen2DAlgorithm {
         }
     }
 
-    public void runAlgorithmOnImage(String inImage, String outImage, int iterations, int rows, int columns) {
+    public void runAlgorithmOnImage(String inImage, String outImage, int iterations, int rows, int columns, int neuronsRows, int neuronsColumns) {
         List<Dataset> d = ImageUtils.datasetsFromImage(inImage, rows, columns);
 
-        this.runAlgorithmWithoutGraph(d, iterations, rows, columns);
+        this.runAlgorithmWithoutGraph(d, iterations, neuronsRows, neuronsColumns);
         ImageUtils.neuronsToImage(this.getNeuronsList(), d, outImage);
     }
 
-    public void runTwoPhaseAlgorithmOnImage(String inImage, String outImage, int iterations, int rows, int columns) {
+    public void runTwoPhaseAlgorithmOnImage(String inImage, String outImage, int iterations, int rows, int columns, int neuronsRows, int neuronsColumns) {
         List<Dataset> d = ImageUtils.datasetsFromImage(inImage, rows, columns);
 
-        this.runTwoPhaseAlgorithmWithoutGraph(d, iterations, rows, columns);
+        this.runTwoPhaseAlgorithmWithoutGraph(d, iterations, neuronsRows, neuronsColumns);
         ImageUtils.neuronsToImage(this.getNeuronsList(), d, outImage);
     }
 
