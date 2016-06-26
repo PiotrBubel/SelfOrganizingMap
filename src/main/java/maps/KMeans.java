@@ -179,6 +179,10 @@ public class KMeans {
             } else {
                 lastError = currentError;
             }
+
+            if (it % 10 == 0) {
+                System.out.println("k-means iteration: " + ti);
+            }
         }
         return input;
     }
@@ -234,7 +238,7 @@ public class KMeans {
     }
 
 
-    public void runAlgorithmOnImage(String inImage, String outImage, int iterations, int rows, int columns) {
+    public void runAlgorithmOnImage(String inImage, String outImage, int iterations, int rows, int columns, int groups) {
         List<Dataset> d = ImageUtils.datasetsFromImage(inImage, rows, columns);
 
         List<ClusteredDataset> clustered = new ArrayList<>();
@@ -242,7 +246,7 @@ public class KMeans {
             clustered.add(new ClusteredDataset(p.getWeights(), 0));
         }
 
-        this.groupClusteredWithoutGraph(clustered, rows * columns, iterations);
+        this.groupClusteredWithoutGraph(clustered, groups, iterations);
 
         List<Neuron> neurons = new ArrayList<>();
         for (int i = 0; i < groupCenters.length; i++) {

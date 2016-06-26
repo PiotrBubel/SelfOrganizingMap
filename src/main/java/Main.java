@@ -6,7 +6,6 @@ import maps.KMeans;
 import maps.Kohonen2DAlgorithm;
 import maps.KohonenAlgorithm;
 import maps.NeuralGasAlgorithm;
-import utils.ImageUtils;
 import utils.Utils;
 
 /**
@@ -76,13 +75,14 @@ public class Main {
             //ImageUtils.test();
 
 
-            String inImage = "image.png";
-            int x = 20;
+            String inImage = "lena.jpg";
+            int x = 40;
             int y = x;
-            int epochs = 1000;
+            int epochs = 750;
+            int neurons = 750;
 
             KMeans kmeans = new KMeans();
-            //kmeans.runAlgorithmOnImage(inImage, "_kmeans_chunks.png", epochs, x, y);
+            kmeans.runAlgorithmOnImage(inImage, "_kmeans__e" + epochs + "_n" + neurons + ".jpg", epochs, x, y, neurons);
 
 
             KohonenAlgorithm.MIN_LAMBDA = 0.01;
@@ -91,7 +91,7 @@ public class Main {
             KohonenAlgorithm.ENABLE_NEURON_POTENTIAL = false;
             KohonenAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
             KohonenAlgorithm koh = new KohonenAlgorithm();
-            koh.runAlgorithmOnImage(inImage, "_koh_1.png", epochs, x, y);
+            koh.runAlgorithmOnImage(inImage, "_koh_e" + epochs + "_n" + neurons + ".jpg", epochs, x, y, neurons);
             System.out.println("koh");
 
 
@@ -101,7 +101,7 @@ public class Main {
             NeuralGasAlgorithm.ENABLE_NEURON_POTENTIAL = false;
             NeuralGasAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
             NeuralGasAlgorithm gas = new NeuralGasAlgorithm();
-            gas.runAlgorithmOnImage(inImage, "_gas_1.png", epochs, x, y);
+            gas.runAlgorithmOnImage(inImage, "_gas__e" + epochs + "_n" + neurons + ".jpg", epochs, x, y, neurons);
             System.out.println("gas");
 
 
@@ -111,7 +111,8 @@ public class Main {
             Kohonen2DAlgorithm.ENABLE_NEURON_POTENTIAL = false;
             Kohonen2DAlgorithm.POTENTIAL_DECRASE_RATE = 0.9d;
             Kohonen2DAlgorithm koh2d = new Kohonen2DAlgorithm();
-            koh2d.runAlgorithmOnImage(inImage, "_koh2d_1.png", epochs, x, y);
+            int n = (int) Math.sqrt(neurons);
+            koh2d.runAlgorithmOnImage(inImage, "_koh2d_e" + epochs + "_n" + neurons + ".jpg", epochs, x, y, n, n);
             System.out.println("koh2");
 
         }

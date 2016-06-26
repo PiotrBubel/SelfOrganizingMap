@@ -25,19 +25,20 @@ public class ImageUtils {
     public static int chunkHeight = -1;
     public static int rows = -1;
     public static int cols = -1;
-    public static int imageType = BufferedImage.TYPE_BYTE_GRAY;
+    public static int imageType = 0;//BufferedImage.TYPE_BYTE_GRAY;
+    //public static BufferedImage loadedImage = null;
 
 
     public static void test() {
         BufferedImage image;
 
-        List<Dataset> datasets = datasetsFromImage("image.png", 5, 5);
+        List<Dataset> datasets = datasetsFromImage("photo2.png", 5, 5);
         BufferedImage[] tab = new BufferedImage[datasets.size()];
         for (int i = 0; i < datasets.size(); i++) {
             tab[i] = ImageUtils.neuronToImage(datasets.get(i).toNeuron());
         }
         image = mergeImages(tab);
-        saveImage("image.png", image);
+        saveImage("photo2.png", image);
     }
 
     private static BufferedImage[] splitImage(BufferedImage image, int rows, int cols) {
@@ -87,7 +88,12 @@ public class ImageUtils {
         int n = 0;
         for (int row = 0; row < height; row++) {
             for (int col = 0; col < width; col++) {
-                result[n] = image.getRGB(col, row);
+                int color = image.getRGB(col, row);
+                int red = (color & 0x00ff0000) >> 16;
+                int green = (color & 0x0000ff00) >> 8;
+                int blue = color & 0x000000ff;
+                result[n] = (red + green + blue) / 3;
+                //result[n] = image.getRGB(col, row);
                 n++;
             }
         }
@@ -112,6 +118,7 @@ public class ImageUtils {
         for (int i = 0; i < input.size(); i++) {
             Neuron winner = ImageUtils.findWinner(input.get(i), neurons);
             splitted[i] = ImageUtils.neuronToImage(winner);
+            System.gc(); //FIXME
         }
 
         ImageUtils.saveImage(outImage, ImageUtils.mergeImages(splitted));
@@ -138,7 +145,8 @@ public class ImageUtils {
         for (int i = 0; i < imageArray.length; i++) {
             for (int j = 0; j < imageArray[0].length; j++) {
                 int pixel = imageArray[i][j];
-                bufferedImage.setRGB(j, i, pixel);
+                int gray = (pixel << 16) + (pixel << 8) + pixel;
+                bufferedImage.setRGB(j, i, gray);
                 //if (pixel != bufferedImage.getRGB(i, j)) {
                 //    System.out.println("nie dziala, pixel: " + pixel + " image: " + bufferedImage.getRGB(i, j));
                 //}
@@ -185,7 +193,7 @@ public class ImageUtils {
 
     public static void saveImage(String fileName, BufferedImage image) {
         try {
-            ImageIO.write(image, "png", new File(fileName));
+            ImageIO.write(image, "jpg", new File(fileName));
         } catch (IOException e) {
             e.printStackTrace();
         }

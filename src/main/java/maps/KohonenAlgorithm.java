@@ -184,6 +184,9 @@ public class KohonenAlgorithm {
                 process(p);
             }
             changeParameters(i, iterations);
+            if (i % 10 == 0) {
+                System.out.println("kohonen iteration: " + i);
+            }
         }
     }
 
@@ -215,17 +218,17 @@ public class KohonenAlgorithm {
         }
     }
 
-    public void runAlgorithmOnImage(String inImage, String outImage, int iterations, int rows, int columns) {
+    public void runAlgorithmOnImage(String inImage, String outImage, int iterations, int rows, int columns, int neurons) {
         List<Dataset> d = ImageUtils.datasetsFromImage(inImage, rows, columns);
 
-        this.runAlgorithmWithoutGraph(d, iterations, rows * columns);
+        this.runAlgorithmWithoutGraph(d, iterations, neurons);
         ImageUtils.neuronsToImage(this.neurons, d, outImage);
     }
 
-    public void runTwoPhaseAlgorithmOnImage(String inImage, String outImage, int iterations, int rows, int columns) {
+    public void runTwoPhaseAlgorithmOnImage(String inImage, String outImage, int iterations, int rows, int columns, int neurons) {
         List<Dataset> d = ImageUtils.datasetsFromImage(inImage, rows, columns);
 
-        this.runTwoPhaseAlgorithmWithoutGraph(d, iterations, rows * columns);
+        this.runTwoPhaseAlgorithmWithoutGraph(d, iterations, neurons);
         ImageUtils.neuronsToImage(this.neurons, d, outImage);
     }
 
